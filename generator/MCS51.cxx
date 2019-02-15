@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn, Joe Davisson
  *
  * MCS-51 (8051) written by Joe Davisson
  *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "MCS51.h"
+#include "generator/MCS51.h"
 
 #define REG_STACK(a) (a)
 #define LOCALS(i) (i * 2)
@@ -63,7 +63,7 @@ int MCS51::start_init()
   return 0;
 }
 
-int MCS51::insert_static_field_define(const char *name, const char *type, int index)
+int MCS51::insert_static_field_define(std::string &name, std::string &type, int index)
 {
   return -1;
 }
@@ -76,23 +76,23 @@ int MCS51::init_heap(int field_count)
   return -1;
 }
 
-int MCS51::field_init_int(char *name, int index, int value)
+int MCS51::field_init_int(std::string &name, int index, int value)
 {
   return -1;
 }
 
-int MCS51::field_init_ref(char *name, int index)
+int MCS51::field_init_ref(std::string &name, int index)
 {
   return -1;
 }
 
-void MCS51::method_start(int local_count, int max_stack, int param_count, const char *name)
+void MCS51::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
   stack = 0;
 
-  is_main = (strcmp(name, "main") == 0) ? 1 : 0;
+  is_main = (name == "main") ? 1 : 0;
 
-  fprintf(out, "%s:\n", name);
+  fprintf(out, "%s:\n", name.c_str());
 
   // main() function goes here
   if (!is_main)
@@ -134,7 +134,7 @@ int MCS51::push_local_var_ref(int index)
   return push_local_var_int(index);
 }
 
-int MCS51::push_ref_static(const char *name, int index)
+int MCS51::push_ref_static(std::string &name, int index)
 {
   return -1;
 }
@@ -165,6 +165,7 @@ int MCS51::push_int(int32_t n)
   return 0;
 }
 
+# if 0
 int MCS51::push_long(int64_t n)
 {
   return push_int((int32_t)n);
@@ -179,8 +180,9 @@ int MCS51::push_double(double f)
 {
   return -1;
 }
+#endif
 
-int MCS51::push_ref(char *name)
+int MCS51::push_ref(std::string &name)
 {
   // Need to move the address of name to the top of stack
   return -1;
@@ -344,12 +346,12 @@ int MCS51::integer_to_short()
   return -1;
 }
 
-int MCS51::jump_cond(const char *label, int cond, int distance)
+int MCS51::jump_cond(std::string &label, int cond, int distance)
 {
   return -1;
 }
 
-int MCS51::jump_cond_integer(const char *label, int cond, int distance)
+int MCS51::jump_cond_integer(std::string &label, int cond, int distance)
 {
   return -1;
 }
@@ -388,12 +390,12 @@ int MCS51::return_void(int local_count)
   return 0;
 }
 
-int MCS51::jump(const char *name, int distance)
+int MCS51::jump(std::string &name, int distance)
 {
   return -1;
 }
 
-int MCS51::call(const char *name)
+int MCS51::call(std::string &name)
 {
   return -1;
 }
@@ -403,12 +405,12 @@ int MCS51::invoke_static_method(const char *name, int params, int is_void)
   return -1;
 }
 
-int MCS51::put_static(const char *name, int index)
+int MCS51::put_static(std::string &name, int index)
 {
   return -1;
 }
 
-int MCS51::get_static(const char *name, int index)
+int MCS51::get_static(std::string &name, int index)
 {
   return -1;
 }
@@ -423,21 +425,27 @@ int MCS51::new_array(uint8_t type)
   return -1;
 }
 
-int MCS51::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int MCS51::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   if (type == TYPE_BYTE)
-  { return insert_db(name, data, len, TYPE_INT); }
+  {
+    return insert_db(name, data, len, TYPE_INT);
+  }
     else
   if (type == TYPE_SHORT)
-  { return insert_dw(name, data, len, TYPE_INT); }
+  {
+    return insert_dw(name, data, len, TYPE_INT);
+  }
     else
   if (type == TYPE_INT)
-  { return insert_dc32(name, data, len, TYPE_INT); }
+  {
+    return insert_dc32(name, data, len, TYPE_INT);
+  }
 
   return -1;
 }
 
-int MCS51::insert_string(const char *name, uint8_t *bytes, int len)
+int MCS51::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   return -1;
 }
@@ -447,7 +455,7 @@ int MCS51::push_array_length()
   return -1;
 }
 
-int MCS51::push_array_length(const char *name, int field_id)
+int MCS51::push_array_length(std::string &name, int field_id)
 {
   return -1;
 }
@@ -467,17 +475,17 @@ int MCS51::array_read_int()
   return -1;
 }
 
-int MCS51::array_read_byte(const char *name, int field_id)
+int MCS51::array_read_byte(std::string &name, int field_id)
 {
   return -1;
 }
 
-int MCS51::array_read_short(const char *name, int field_id)
+int MCS51::array_read_short(std::string &name, int field_id)
 {
   return -1;
 }
 
-int MCS51::array_read_int(const char *name, int field_id)
+int MCS51::array_read_int(std::string &name, int field_id)
 {
   return -1;
 }
@@ -497,17 +505,17 @@ int MCS51::array_write_int()
   return -1;
 }
 
-int MCS51::array_write_byte(const char *name, int field_id)
+int MCS51::array_write_byte(std::string &name, int field_id)
 {
   return -1;
 }
 
-int MCS51::array_write_short(const char *name, int field_id)
+int MCS51::array_write_short(std::string &name, int field_id)
 {
   return -1;
 }
 
-int MCS51::array_write_int(const char *name, int field_id)
+int MCS51::array_write_int(std::string &name, int field_id)
 {
   return -1;
 }

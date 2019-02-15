@@ -3,14 +3,14 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _API_MATH_H
-#define _API_MATH_H
+#ifndef JAVA_GRINDER_GENERATOR_API_MATH_H
+#define JAVA_GRINDER_GENERATOR_API_MATH_H
 
 class API_Math
 {
@@ -19,6 +19,8 @@ public:
   virtual int math_xor_I() { return -1; }
   virtual int math_min_II() { return -1; }
   virtual int math_max_II() { return -1; }
+  virtual int math_sin512_I() { return -1; }
+  virtual int math_cos512_I() { return -1; }
 };
 
 #endif

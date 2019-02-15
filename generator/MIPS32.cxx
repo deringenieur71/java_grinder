@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,7 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "MIPS32.h"
+#include "generator/MIPS32.h"
 
 #define REG_STACK(a) (a)
 #define LOCALS(i) (-(i * 4))
@@ -112,9 +112,9 @@ int MIPS32::start_init()
   return 0;
 }
 
-int MIPS32::insert_static_field_define(const char *name, const char *type, int index)
+int MIPS32::insert_static_field_define(std::string &name, std::string &type, int index)
 {
-  fprintf(out, "  %s equ ram_start+%d\n", name, index * 4);
+  fprintf(out, "  %s equ ram_start+%d\n", name.c_str(), index * 4);
   return 0;
 }
 
@@ -126,7 +126,7 @@ int MIPS32::init_heap(int field_count)
   return 0;
 }
 
-int MIPS32::field_init_int(char *name, int index, int value)
+int MIPS32::field_init_int(std::string &name, int index, int value)
 {
   uint32_t n = (uint32_t)value;
 
@@ -165,28 +165,28 @@ int MIPS32::field_init_int(char *name, int index, int value)
     fprintf(out, "  li $t8, 0x%04x\n", n);
   }
 
-  fprintf(out, "  sw $t8, 0x%04x($s1) ; static %s\n", index * 4, name);
+  fprintf(out, "  sw $t8, 0x%04x($s1) ; static %s\n", index * 4, name.c_str());
 
   return 0;
 }
 
-int MIPS32::field_init_ref(char *name, int index)
+int MIPS32::field_init_ref(std::string &name, int index)
 {
   fprintf(out, "  ; static init\n");
-  fprintf(out, "  li $t8, _%s + voffset\n", name);
+  fprintf(out, "  li $t8, _%s + voffset\n", name.c_str());
   //fprintf(out, "  sw $t8, 0x%04x($s1)\n", index * 4);
-  fprintf(out, "  li $t9, %s\n", name);
+  fprintf(out, "  li $t9, %s\n", name.c_str());
   fprintf(out, "  sw $t8, ($t9)\n");
 
   return 0;
 }
 
-void MIPS32::method_start(int local_count, int max_stack, int param_count, const char *name)
+void MIPS32::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
-  is_main = (strcmp(name, "main") == 0) ? 1 : 0;
+  is_main = (name == "main") ? 1 : 0;
 
-  fprintf(out, "%s:\n", name);
-  fprintf(out, "  ; %s(local_count=%d, max_stack=%d, param_count=%d)\n", name, local_count, max_stack, param_count);
+  fprintf(out, "%s:\n", name.c_str());
+  fprintf(out, "  ; %s(local_count=%d, max_stack=%d, param_count=%d)\n", name.c_str(), local_count, max_stack, param_count);
   fprintf(out, "  addiu $fp, $sp, -4\n");
   fprintf(out, "  addiu $sp, $sp, -%d\n", (local_count * 4) + 4);
 }
@@ -223,7 +223,7 @@ int MIPS32::push_local_var_ref(int index)
   return push_local_var_int(index);
 }
 
-int MIPS32::push_ref_static(const char *name, int index)
+int MIPS32::push_ref_static(std::string &name, int index)
 {
   if (reg < reg_max)
   {
@@ -315,6 +315,7 @@ int MIPS32::push_int(int32_t n)
   return 0;
 }
 
+#if 0
 int MIPS32::push_long(int64_t n)
 {
   return -1;
@@ -329,11 +330,12 @@ int MIPS32::push_double(double f)
 {
   return -1;
 }
+#endif
 
-int MIPS32::push_ref(char *name)
+int MIPS32::push_ref(std::string &name)
 {
-  fprintf(out, "  ; push_ref(%s)\n", name);
-  fprintf(out, "  li $t8, %s\n", name);
+  fprintf(out, "  ; push_ref(%s)\n", name.c_str());
+  fprintf(out, "  li $t8, %s\n", name.c_str());
 
   if (reg < reg_max)
   {
@@ -353,7 +355,7 @@ int MIPS32::pop_local_var_int(int index)
 {
   if (stack > 0)
   {
-    STACK_POP(8); 
+    STACK_POP(8);
     fprintf(out, "  sw $t8, %d($fp) ; local_%d\n", LOCALS(index), index);
   }
     else
@@ -715,34 +717,34 @@ int MIPS32::integer_to_short()
   return 0;
 }
 
-int MIPS32::jump_cond(const char *label, int cond, int distance)
+int MIPS32::jump_cond(std::string &label, int cond, int distance)
 {
-  fprintf(out, "  ; jump_cond(%s, %d, %d)\n", label, cond, distance);
+  fprintf(out, "  ; jump_cond(%s, %d, %d)\n", label.c_str(), cond, distance);
 
   switch(cond)
   {
     case COND_EQUAL:
-      fprintf(out, "  beq $t%d, $0, %s\n", --reg, label);
+      fprintf(out, "  beq $t%d, $0, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     case COND_NOT_EQUAL:
-      fprintf(out, "  bne $t%d, $0, %s\n", --reg, label);
+      fprintf(out, "  bne $t%d, $0, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     case COND_LESS:
-      fprintf(out, "  bltz $t%d, %s\n", --reg, label);
+      fprintf(out, "  bltz $t%d, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     case COND_LESS_EQUAL:
-      fprintf(out, "  blez $t%d, %s\n", --reg, label);
+      fprintf(out, "  blez $t%d, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     case COND_GREATER:
-      fprintf(out, "  bgtz $t%d, %s\n", --reg, label);
+      fprintf(out, "  bgtz $t%d, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     case COND_GREATER_EQUAL:
-      fprintf(out, "  bgez $t%d, %s\n", --reg, label);
+      fprintf(out, "  bgez $t%d, %s\n", --reg, label.c_str());
       fprintf(out, "  nop\n");
       return 0;
     default:
@@ -752,9 +754,9 @@ int MIPS32::jump_cond(const char *label, int cond, int distance)
   return -1;
 }
 
-int MIPS32::jump_cond_integer(const char *label, int cond, int distance)
+int MIPS32::jump_cond_integer(std::string &label, int cond, int distance)
 {
-  fprintf(out, "  ; jump_cond_integer(%s, %d, %d)\n", label, cond, distance);
+  fprintf(out, "  ; jump_cond_integer(%s, %d, %d)\n", label.c_str(), cond, distance);
 
   // I think this should never happen
   if (stack != 0)
@@ -766,36 +768,36 @@ int MIPS32::jump_cond_integer(const char *label, int cond, int distance)
   switch(cond)
   {
     case COND_EQUAL:
-      fprintf(out, "  beq $t%d, $t%d, %s\n", reg - 2, reg - 1, label);
+      fprintf(out, "  beq $t%d, $t%d, %s\n", reg - 2, reg - 1, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
     case COND_NOT_EQUAL:
-      fprintf(out, "  bne $t%d, $t%d, %s\n", reg - 2, reg - 1, label);
+      fprintf(out, "  bne $t%d, $t%d, %s\n", reg - 2, reg - 1, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
     case COND_LESS:
       fprintf(out, "  subu $t%d, $t%d, $t%d\n", reg - 2, reg - 2, reg - 1);
-      fprintf(out, "  bltz $t%d, %s\n", reg - 2, label);
+      fprintf(out, "  bltz $t%d, %s\n", reg - 2, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
     case COND_LESS_EQUAL:
       fprintf(out, "  subu $t%d, $t%d, $t%d\n", reg - 2, reg - 2, reg - 1);
-      fprintf(out, "  blez $t%d, %s\n", reg - 2, label);
+      fprintf(out, "  blez $t%d, %s\n", reg - 2, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
     case COND_GREATER:
       fprintf(out, "  subu $t%d, $t%d, $t%d\n", reg - 2, reg - 2, reg - 1);
-      fprintf(out, "  bgtz $t%d, %s\n", reg - 2, label);
+      fprintf(out, "  bgtz $t%d, %s\n", reg - 2, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
     case COND_GREATER_EQUAL:
       fprintf(out, "  subu $t%d, $t%d, $t%d\n", reg - 2, reg - 2, reg - 1);
-      fprintf(out, "  bgez $t%d, %s\n", reg - 2, label);
+      fprintf(out, "  bgez $t%d, %s\n", reg - 2, label.c_str());
       fprintf(out, "  nop\n");
       reg -= 2;
       return 0;
@@ -966,15 +968,15 @@ int MIPS32::return_void(int local_count)
   return 0;
 }
 
-int MIPS32::jump(const char *name, int distance)
+int MIPS32::jump(std::string &name, int distance)
 {
-  fprintf(out, "  b %s\n", name);
+  fprintf(out, "  b %s\n", name.c_str());
   fprintf(out, "  nop ; Delay slot\n");
 
   return 0;
 }
 
-int MIPS32::call(const char *name)
+int MIPS32::call(std::string &name)
 {
   return -1;
 }
@@ -1065,9 +1067,9 @@ int MIPS32::invoke_static_method(const char *name, int params, int is_void)
   return 0;
 }
 
-int MIPS32::put_static(const char *name, int index)
+int MIPS32::put_static(std::string &name, int index)
 {
-  fprintf(out, "  ; put_static(%s, %d)\n", name, index);
+  fprintf(out, "  ; put_static(%s, %d)\n", name.c_str(), index);
 
   if (stack > 0)
   {
@@ -1083,9 +1085,9 @@ int MIPS32::put_static(const char *name, int index)
   return 0;
 }
 
-int MIPS32::get_static(const char *name, int index)
+int MIPS32::get_static(std::string &name, int index)
 {
-  fprintf(out, "  ; get_static(%s, %d)\n", name, index);
+  fprintf(out, "  ; get_static(%s, %d)\n", name.c_str(), index);
 
   if (reg < reg_max)
   {
@@ -1151,22 +1153,29 @@ int MIPS32::new_array(uint8_t type)
   return 0;
 }
 
-int MIPS32::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int MIPS32::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   fprintf(out, ".align 32\n");
+
   if (type == TYPE_BYTE)
-  { return insert_db(name, data, len, TYPE_INT); }
+  {
+    return insert_db(name, data, len, TYPE_INT);
+  }
     else
   if (type == TYPE_SHORT)
-  { return insert_dw(name, data, len, TYPE_INT); } 
+  {
+    return insert_dw(name, data, len, TYPE_INT);
+  }
     else
   if (type == TYPE_INT)
-  { return insert_dc32(name, data, len, TYPE_INT); } 
+  {
+    return insert_dc32(name, data, len, TYPE_INT);
+  }
 
   return -1;
 }
 
-int MIPS32::insert_string(const char *name, uint8_t *bytes, int len)
+int MIPS32::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   fprintf(out, ".align 32\n");
   fprintf(out, "  dc32 %d\n", len);
@@ -1180,7 +1189,7 @@ int MIPS32::push_array_length()
     fprintf(out, "  lw $t8, 0($sp)\n"); \
     fprintf(out, "  lw $t8, -4($t8)\n");
     fprintf(out, "  sw $t8, 0($sp)\n"); \
-    STACK_PUSH(8); 
+    STACK_PUSH(8);
   }
     else
   {
@@ -1190,13 +1199,13 @@ int MIPS32::push_array_length()
   return 0;
 }
 
-int MIPS32::push_array_length(const char *name, int field_id)
+int MIPS32::push_array_length(std::string &name, int field_id)
 {
-  fprintf(out, "  lw $t8, 0x%04x($s1) ; static %s\n", field_id * 4, name);
+  fprintf(out, "  lw $t8, 0x%04x($s1) ; static %s\n", field_id * 4, name.c_str());
 
   if (reg >= reg_max)
   {
-    STACK_PUSH(8); 
+    STACK_PUSH(8);
   }
     else
   {
@@ -1278,7 +1287,7 @@ int MIPS32::array_read_int()
   return 0;
 }
 
-int MIPS32::array_read_byte(const char *name, int field_id)
+int MIPS32::array_read_byte(std::string &name, int field_id)
 {
   int index_reg;
 
@@ -1301,7 +1310,7 @@ int MIPS32::array_read_byte(const char *name, int field_id)
   return 0;
 }
 
-int MIPS32::array_read_short(const char *name, int field_id)
+int MIPS32::array_read_short(std::string &name, int field_id)
 {
   int index_reg;
 
@@ -1325,7 +1334,7 @@ int MIPS32::array_read_short(const char *name, int field_id)
   return 0;
 }
 
-int MIPS32::array_read_int(const char *name, int field_id)
+int MIPS32::array_read_int(std::string &name, int field_id)
 {
   int index_reg;
 
@@ -1419,7 +1428,7 @@ int MIPS32::array_write_int()
   return 0;
 }
 
-int MIPS32::array_write_byte(const char *name, int field_id)
+int MIPS32::array_write_byte(std::string &name, int field_id)
 {
   int value_reg;
   int index_reg;
@@ -1433,7 +1442,7 @@ int MIPS32::array_write_byte(const char *name, int field_id)
   return 0;
 }
 
-int MIPS32::array_write_short(const char *name, int field_id)
+int MIPS32::array_write_short(std::string &name, int field_id)
 {
   int value_reg;
   int index_reg;
@@ -1448,7 +1457,7 @@ int MIPS32::array_write_short(const char *name, int field_id)
   return 0;
 }
 
-int MIPS32::array_write_int(const char *name, int field_id)
+int MIPS32::array_write_int(std::string &name, int field_id)
 {
   int value_reg;
   int index_reg;

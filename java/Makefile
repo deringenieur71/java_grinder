@@ -2,11 +2,14 @@ PKG_DIR=net/mikekohn/java_grinder
 
 SRC_DIR=net/mikekohn/java_grinder
 JAVA_SRC=\
+  $(SRC_DIR)/amiga/Amiga.java \
+  $(SRC_DIR)/amiga/Blitter.java \
+  $(SRC_DIR)/amiga/Copper.java \
   $(SRC_DIR)/AppleIIgs.java \
   $(SRC_DIR)/Atari2600.java \
   $(SRC_DIR)/ADC.java \
-  $(SRC_DIR)/C64/SID.java \
-  $(SRC_DIR)/C64/VIC.java \
+  $(SRC_DIR)/c64/SID.java \
+  $(SRC_DIR)/c64/VIC.java \
   $(SRC_DIR)/CPC.java \
   $(SRC_DIR)/CPU.java \
   $(SRC_DIR)/DSP.java \
@@ -25,6 +28,23 @@ JAVA_SRC=\
   $(SRC_DIR)/Parallella.java \
   $(SRC_DIR)/Playstation2.java \
   $(SRC_DIR)/Propeller.java \
+  $(SRC_DIR)/draw3d/Draw3DObject.java \
+  $(SRC_DIR)/draw3d/Draw3DObjectWithTexture.java \
+  $(SRC_DIR)/draw3d/Points.java \
+  $(SRC_DIR)/draw3d/Line.java \
+  $(SRC_DIR)/draw3d/LineStrip.java \
+  $(SRC_DIR)/draw3d/Sprite.java \
+  $(SRC_DIR)/draw3d/SpriteWithTexture.java \
+  $(SRC_DIR)/draw3d/Triangle.java \
+  $(SRC_DIR)/draw3d/TriangleWithTexture.java \
+  $(SRC_DIR)/draw3d/TriangleStrip.java \
+  $(SRC_DIR)/draw3d/TriangleStripWithTexture.java \
+  $(SRC_DIR)/draw3d/TriangleFan.java \
+  $(SRC_DIR)/draw3d/TriangleFanWithTexture.java \
+  $(SRC_DIR)/draw3d/Texture.java \
+  $(SRC_DIR)/draw3d/Texture16.java \
+  $(SRC_DIR)/draw3d/Texture24.java \
+  $(SRC_DIR)/draw3d/Texture32.java \
   $(SRC_DIR)/SegaGenesis.java \
   $(SRC_DIR)/SNES.java \
   $(SRC_DIR)/SPI.java \
@@ -53,6 +73,4 @@ asdf: $(JOBJS)
 clean:
 	@rm -f *.class
 	@rm -f *.jar
-	@rm -rf net
-
 

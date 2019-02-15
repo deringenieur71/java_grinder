@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,10 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "adc.h"
-  //if (strncmp(#funct#sig, function, sizeof(#funct#sig)-1) == 0)
-  //if (strncmp(#funct#sig, function, sizeof(#funct#sig)-1) == 0)
+#include "api/adc.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, function) == 0) \
@@ -58,7 +55,7 @@ static int adc_read(JavaClass *java_class, Generator *generator)
 }
 #endif
 
-int adc(JavaClass *java_class, Generator *generator, char *function)
+int adc(JavaClass *java_class, Generator *generator, const char *function)
 {
   CHECK_FUNC(enable,)
   CHECK_FUNC(disable,)
@@ -68,7 +65,7 @@ int adc(JavaClass *java_class, Generator *generator, char *function)
   return -1;
 }
 
-int adc(JavaClass *java_class, Generator *generator, char *function, int const_val)
+int adc(JavaClass *java_class, Generator *generator, const char *function, int const_val)
 {
   CHECK_FUNC_CONST_1(setChannel,_I)
   return -1;

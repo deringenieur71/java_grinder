@@ -3,18 +3,18 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * C64 written by Joe Davisson
  *
  */
 
-#ifndef _C64_H
-#define _C64_H
+#ifndef JAVA_GRINDER_GENERATOR_C64_H
+#define JAVA_GRINDER_GENERATOR_C64_H
 
-#include "M6502.h"
+#include "generator/M6502.h"
 
 class C64 : public M6502
 {

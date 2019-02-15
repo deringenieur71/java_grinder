@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _TI99_H
-#define _TI99_H
+#ifndef JAVA_GRINDER_GENERATOR_TI99_H
+#define JAVA_GRINDER_GENERATOR_TI99_H
 
-#include "TMS9900.h"
+#include "generator/TMS9900.h"
 
 class TI99 : public TMS9900
 {

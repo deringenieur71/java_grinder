@@ -3,19 +3,19 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _C64_SID_H
-#define _C64_SID_H
+#ifndef JAVA_GRINDER_API_C64_SID_H
+#define JAVA_GRINDER_API_C64_SID_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include "common/JavaClass.h"
+#include "generator/Generator.h"
 
-int c64_sid(JavaClass *java_class, Generator *generator, char *method_name);
+int c64_sid(JavaClass *java_class, Generator *generator, const char *method_name);
 
 #endif
 

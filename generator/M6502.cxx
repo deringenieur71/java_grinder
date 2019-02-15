@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn, Joe Davisson
+ * Copyright 2014-2018 by Michael Kohn, Joe Davisson
  *
  * M6502 written by Joe Davisson
  *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "M6502.h"
+#include "generator/M6502.h"
 
 // ABI is:
 // A - accumulator
@@ -141,9 +141,9 @@ int M6502::start_init()
   return 0;
 }
 
-int M6502::insert_static_field_define(const char *name, const char *type, int index)
+int M6502::insert_static_field_define(std::string &name, std::string &type, int index)
 {
-  fprintf(out, "%s equ ram_start + %d\n", name, (index + 1) * 2);
+  fprintf(out, "%s equ ram_start + %d\n", name.c_str(), (index + 1) * 2);
 
   return 0;
 }
@@ -202,37 +202,37 @@ int M6502::field_init_short(char *name, int index, int value)
 }
 #endif
 
-int M6502::field_init_int(char *name, int index, int value)
+int M6502::field_init_int(std::string &name, int index, int value)
 {
   if (value < -32768 || value > 65535) { return -1; }
 
   fprintf(out, "; field_init_int\n");
   fprintf(out, "  lda #%d\n", value & 0xff);
-  fprintf(out, "  sta %s + 0\n", name);
+  fprintf(out, "  sta %s + 0\n", name.c_str());
   fprintf(out, "  lda #%d\n", value >> 8);
-  fprintf(out, "  sta %s + 1\n", name);
+  fprintf(out, "  sta %s + 1\n", name.c_str());
 
   return 0;
 }
 
-int M6502::field_init_ref(char *name, int index)
+int M6502::field_init_ref(std::string &name, int index)
 {
   fprintf(out, "; field_init_ref\n");
-  fprintf(out, "  lda #_%s & 0xff\n", name);
-  fprintf(out, "  sta %s + 0\n", name);
-  fprintf(out, "  lda #_%s >> 8\n", name);
-  fprintf(out, "  sta %s + 1\n", name);
+  fprintf(out, "  lda #_%s & 0xff\n", name.c_str());
+  fprintf(out, "  sta %s + 0\n", name.c_str());
+  fprintf(out, "  lda #_%s >> 8\n", name.c_str());
+  fprintf(out, "  sta %s + 1\n", name.c_str());
 
   return 0;
 }
 
-void M6502::method_start(int local_count, int max_stack, int param_count, const char *name)
+void M6502::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
   stack = 0;
 
-  is_main = (strcmp(name, "main") == 0) ? 1 : 0;
+  is_main = (name == "main") ? 1 : 0;
 
-  fprintf(out, "%s:\n", name);
+  fprintf(out, "%s:\n", name.c_str());
 
   // main() function goes here
   if (!is_main)
@@ -273,7 +273,7 @@ int M6502::push_local_var_ref(int index)
   return push_local_var_int(index);
 }
 
-int M6502::push_ref_static(const char *name, int index)
+int M6502::push_ref_static(std::string &name, int index)
 {
   return -1;
 }
@@ -309,19 +309,17 @@ int M6502::push_long(int64_t n)
   return push_int((int32_t)n);
 }
 
+#if 0
 int M6502::push_float(float f)
 {
-  printf("float is not supported right now\n");
-
   return -1;
 }
 
 int M6502::push_double(double f)
 {
-  printf("double is not supported right now\n");
-
   return -1;
 }
+#endif
 
 #if 0
 int M6502::push_byte(int8_t b)
@@ -354,13 +352,13 @@ int M6502::push_short(int16_t s)
 }
 #endif
 
-int M6502::push_ref(char *name)
+int M6502::push_ref(std::string &name)
 {
   
   fprintf(out, "; push_ref\n");
-  fprintf(out, "  lda %s + 0\n", name);
+  fprintf(out, "  lda %s + 0\n", name.c_str());
   PUSH_LO();
-  fprintf(out, "  lda %s + 1\n", name);
+  fprintf(out, "  lda %s + 1\n", name.c_str());
   PUSH_HI();
   stack++;
 
@@ -618,7 +616,7 @@ int M6502::integer_to_short()
   return 0;
 }
 
-int M6502::jump_cond(const char *label, int cond, int distance)
+int M6502::jump_cond(std::string &label, int cond, int distance)
 {
   bool reverse = false;
 
@@ -648,7 +646,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
         fprintf(out, "  lda stack_hi - 0,x\n");
         fprintf(out, "  cmp #0\n");
         fprintf(out, "  bne #3\n");
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_NOT_EQUAL:
         fprintf(out, "  lda stack_lo - 0,x\n");
@@ -657,7 +655,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
         fprintf(out, "  lda stack_hi - 0,x\n");
         fprintf(out, "  cmp #0\n");
         fprintf(out, "  beq #3\n");
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_LESS:
         if(reverse == false)
@@ -669,7 +667,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bpl #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
@@ -680,7 +678,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bpl #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
       case COND_GREATER_EQUAL:
@@ -693,7 +691,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bmi #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
@@ -704,7 +702,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bmi #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
     }
@@ -715,7 +713,7 @@ int M6502::jump_cond(const char *label, int cond, int distance)
   return 0;
 }
 
-int M6502::jump_cond_integer(const char *label, int cond, int distance)
+int M6502::jump_cond_integer(std::string &label, int cond, int distance)
 {
   bool reverse = false;
 
@@ -746,7 +744,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
         fprintf(out, "  lda stack_hi - 0,x\n");
         fprintf(out, "  cmp stack_hi - 1,x\n");
         fprintf(out, "  bne #3\n");
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_NOT_EQUAL:
         fprintf(out, "  lda stack_lo - 0,x\n");
@@ -755,7 +753,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
         fprintf(out, "  lda stack_hi - 0,x\n");
         fprintf(out, "  cmp stack_hi - 1,x\n");
         fprintf(out, "  beq #3\n");
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_LESS:
         if(reverse == false)
@@ -767,7 +765,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bpl #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
@@ -778,7 +776,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bpl #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
       case COND_GREATER_EQUAL:
@@ -791,7 +789,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bmi #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
@@ -802,7 +800,7 @@ int M6502::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  bvc #2\n");
           fprintf(out, "  eor #0x80\n");
           fprintf(out, "  bmi #3\n");
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
     }
@@ -886,16 +884,16 @@ int M6502::return_void(int local_count)
   return 0;
 }
 
-int M6502::jump(const char *name, int distance)
+int M6502::jump(std::string &name, int distance)
 {
-  fprintf(out, "  jmp %s\n", name);
+  fprintf(out, "  jmp %s\n", name.c_str());
 
   return 0;
 }
 
-int M6502::call(const char *name)
+int M6502::call(std::string &name)
 {
-  fprintf(out, "  jsr %s\n", name);
+  fprintf(out, "  jsr %s\n", name.c_str());
 
   return 0;
 }
@@ -905,7 +903,7 @@ int M6502::invoke_static_method(const char *name, int params, int is_void)
 int local;
 int stack_vars = stack;
 
-  printf("invoke_static_method() name=%s params=%d is_void=%d\n", name, params, is_void);
+  //printf("invoke_static_method() name=%s params=%d is_void=%d\n", name, params, is_void);
 
   fprintf(out, "; invoke_static_method\n");
 
@@ -948,25 +946,25 @@ int stack_vars = stack;
   return 0;
 }
 
-int M6502::put_static(const char *name, int index)
+int M6502::put_static(std::string &name, int index)
 {
   if (stack > 0)
   {
     POP_HI();
-    fprintf(out, "  sta %s + 1\n", name);
+    fprintf(out, "  sta %s + 1\n", name.c_str());
     POP_LO();
-    fprintf(out, "  sta %s + 0\n", name);
+    fprintf(out, "  sta %s + 0\n", name.c_str());
     stack--;
   }
 
   return 0;
 }
 
-int M6502::get_static(const char *name, int index)
+int M6502::get_static(std::string &name, int index)
 {
-  fprintf(out, "  lda %s + 0\n", name);
+  fprintf(out, "  lda %s + 0\n", name.c_str());
   PUSH_LO();
-  fprintf(out, "  lda %s + 1\n", name);
+  fprintf(out, "  lda %s + 1\n", name.c_str());
   PUSH_HI();
   stack++;
 
@@ -997,7 +995,7 @@ int M6502::new_array(uint8_t type)
   return 0;
 }
 
-int M6502::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int M6502::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   fprintf(out, "; insert_array\n");
 
@@ -1019,7 +1017,7 @@ int M6502::insert_array(const char *name, int32_t *data, int len, uint8_t type)
   return -1;
 }
 
-int M6502::insert_string(const char *name, uint8_t *bytes, int len)
+int M6502::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   return -1;
 }
@@ -1035,12 +1033,12 @@ int M6502::push_array_length()
   return 0;
 }
 
-int M6502::push_array_length(const char *name, int field_id)
+int M6502::push_array_length(std::string &name, int field_id)
 {
   need_push_array_length2 = 1;
-  fprintf(out, "  lda %s + 0\n", name);
+  fprintf(out, "  lda %s + 0\n", name.c_str());
   fprintf(out, "  sta address + 0\n");
-  fprintf(out, "  lda %s + 1\n", name);
+  fprintf(out, "  lda %s + 1\n", name.c_str());
   fprintf(out, "  sta address + 1\n");
   fprintf(out, "jsr push_array_length2\n");
   stack++;
@@ -1073,14 +1071,14 @@ int M6502::array_read_int()
   return 0;
 }
 
-int M6502::array_read_byte(const char *name, int field_id)
+int M6502::array_read_byte(std::string &name, int field_id)
 {
   need_array_byte_support = 1;
   if (stack > 0)
   {
-    fprintf(out, "  lda %s + 0\n", name);
+    fprintf(out, "  lda %s + 0\n", name.c_str());
     fprintf(out, "  sta address + 0\n");
-    fprintf(out, "  lda %s + 1\n", name);
+    fprintf(out, "  lda %s + 1\n", name.c_str());
     fprintf(out, "  sta address + 1\n");
 
     fprintf(out, "jsr array_read_byte2\n");
@@ -1089,20 +1087,20 @@ int M6502::array_read_byte(const char *name, int field_id)
   return 0;
 }
 
-int M6502::array_read_short(const char *name, int field_id)
+int M6502::array_read_short(std::string &name, int field_id)
 {
   return array_read_int(name, field_id);
 }
 
-int M6502::array_read_int(const char *name, int field_id)
+int M6502::array_read_int(std::string &name, int field_id)
 {
   need_array_int_support = 1;
 
   if (stack > 0)
   {
-    fprintf(out, "  lda %s + 0\n", name);
+    fprintf(out, "  lda %s + 0\n", name.c_str());
     fprintf(out, "  sta address + 0\n");
-    fprintf(out, "  lda %s + 1\n", name);
+    fprintf(out, "  lda %s + 1\n", name.c_str());
     fprintf(out, "  sta address + 1\n");
     fprintf(out, "jsr array_read_int2\n");
   }
@@ -1133,16 +1131,16 @@ int M6502::array_write_int()
   return 0;
 }
 
-int M6502::array_write_byte(const char *name, int field_id)
+int M6502::array_write_byte(std::string &name, int field_id)
 {
   get_values_from_stack(2);
   fprintf(out, "; array_write_byte2\n");
   fprintf(out, "  clc\n"); 
   fprintf(out, "  lda value2 + 0\n"); 
-  fprintf(out, "  adc %s + 0\n", name); 
+  fprintf(out, "  adc %s + 0\n", name.c_str()); 
   fprintf(out, "  sta address + 0\n"); 
   fprintf(out, "  lda value2 + 1\n"); 
-  fprintf(out, "  adc %s + 1\n", name); 
+  fprintf(out, "  adc %s + 1\n", name.c_str()); 
   fprintf(out, "  sta address + 1\n"); 
 
   fprintf(out, "  ldy #0\n"); 
@@ -1152,12 +1150,12 @@ int M6502::array_write_byte(const char *name, int field_id)
   return 0;
 }
 
-int M6502::array_write_short(const char *name, int field_id)
+int M6502::array_write_short(std::string &name, int field_id)
 {
   return array_write_int(name, field_id);
 }
 
-int M6502::array_write_int(const char *name, int field_id)
+int M6502::array_write_int(std::string &name, int field_id)
 {
   get_values_from_stack(2);
   fprintf(out, "; array_write_int2\n");
@@ -1166,10 +1164,10 @@ int M6502::array_write_int(const char *name, int field_id)
 
   fprintf(out, "  clc\n"); 
   fprintf(out, "  lda value2 + 0\n"); 
-  fprintf(out, "  adc %s + 0\n", name); 
+  fprintf(out, "  adc %s + 0\n", name.c_str()); 
   fprintf(out, "  sta address + 0\n"); 
   fprintf(out, "  lda value2 + 1\n"); 
-  fprintf(out, "  adc %s + 1\n", name); 
+  fprintf(out, "  adc %s + 1\n", name.c_str()); 
   fprintf(out, "  sta address + 1\n"); 
 
   fprintf(out, "  ldy #0\n"); 

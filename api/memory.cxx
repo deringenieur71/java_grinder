@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "memory.h"
+#include "api/memory.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, function) == 0) \
@@ -29,7 +28,13 @@
     return generator->memory_##funct##sig(const_val); \
   }
 
-int memory(JavaClass *java_class, Generator *generator, char *function)
+#define CHECK_FUNC_STRING(funct,sig) \
+  if (strcmp(#funct#sig, function) == 0) \
+  { \
+    return generator->memory_##funct##sig(const_val); \
+  }
+
+int memory(JavaClass *java_class, Generator *generator, const char *function)
 {
   CHECK_FUNC(read8,_I)
   CHECK_FUNC(write8,_IB)
@@ -42,7 +47,7 @@ int memory(JavaClass *java_class, Generator *generator, char *function)
   return -1;
 }
 
-int memory(JavaClass *java_class, Generator *generator, char *function, int const_val)
+int memory(JavaClass *java_class, Generator *generator, const char *function, int const_val)
 {
   CHECK_FUNC_CONST(read8,_I)
   CHECK_FUNC_CONST(read16,_I)
@@ -50,5 +55,11 @@ int memory(JavaClass *java_class, Generator *generator, char *function, int cons
   return -1;
 }
 
+int memory(JavaClass *java_class, Generator *generator, const char *function, const char *const_val)
+{
+  CHECK_FUNC_STRING(preloadByteArray,_X)
+  CHECK_FUNC_STRING(preloadIntArray,_X)
 
+  return -1;
+}
 

@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,8 @@
  *                  Emiliano Fraga - https://github.com/efraga-msx
  */
 
-#ifndef _API_MSX_H
-#define _API_MSX_H
+#ifndef JAVA_GRINDER_GENERATOR_API_MSX_H
+#define JAVA_GRINDER_GENERATOR_API_MSX_H
 
 class API_MSX
 {

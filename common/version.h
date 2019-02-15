@@ -1,7 +1,7 @@
-#ifndef _VERSION_H
-#define _VERSION_H
+#ifndef JAVA_GRINDER_COMMON_VERSION_H
+#define JAVA_GRINDER_COMMON_VERSION_H
 
-#define VERSION "May 15, 2016"
+#define VERSION "January 19, 2019"
 
 #endif
 

@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _APPLE_II_GS_H
-#define _APPLE_II_GS_H
+#ifndef JAVA_GRINDER_GENERATOR_APPLE_II_GS_H
+#define JAVA_GRINDER_GENERATOR_APPLE_II_GS_H
 
-#include "W65816.h"
+#include "generator/W65816.h"
 
 class AppleIIgs : public W65816
 {

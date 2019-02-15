@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "JavaCompiler.h"
+#include "java_lang_system.h"
 
 static int system_out_println(JavaClass *java_class, Generator *generator)
 {
@@ -25,7 +24,7 @@ static int system_out_println(JavaClass *java_class, Generator *generator)
   return 0;
 }
 
-int java_lang_system(JavaClass *java_class, Generator *generator, char *function)
+int java_lang_system(JavaClass *java_class, Generator *generator, const char *function)
 {
   if (strncmp("system_out_println", function, sizeof("system_out_println")-1) == 0)
   {

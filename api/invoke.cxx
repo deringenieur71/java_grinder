@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,23 +14,23 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "JavaCompiler.h"
-#include "invoke.h"
-#include "adc.h"
-#include "c64_sid.h"
-#include "c64_vic.h"
-#include "cpu.h"
-#include "dsp.h"
-#include "ioport.h"
-#include "memory.h"
-#include "spi.h"
-#include "ti84_.h"
-#include "ti99_.h"
-#include "timer.h"
-#include "uart.h"
-#include "java_lang_string.h"
-#include "java_lang_system.h"
+#include "api/invoke.h"
+#include "api/adc.h"
+#include "api/c64_sid.h"
+#include "api/c64_vic.h"
+#include "api/cpu.h"
+#include "api/dsp.h"
+#include "api/ioport.h"
+#include "api/memory.h"
+#include "api/spi.h"
+#include "api/ti84.h"
+#include "api/ti99.h"
+#include "api/timer.h"
+#include "api/uart.h"
+#include "api/java_lang_string.h"
+#include "api/java_lang_system.h"
+#include "common/JavaClass.h"
+#include "common/JavaCompiler.h"
 
 #define CHECK_WITH_PORT(a,b,c) \
     if (strcmp(cls, #a#c) == 0) \
@@ -68,36 +68,38 @@
       ret = b(java_class, generator, function, const_vals[0], const_vals[1]); \
     }
 
-void get_signature(char *signature, int *params, int *is_void)
+void get_signature(std::string &signature, int *params, int *is_void)
 {
+  const char *s = signature.c_str();
+
   *params = 0;
   *is_void = 0;
 
-  while(*signature != 0)
+  while(*s != 0)
   {
-    if (*signature == '(')
+    if (*s == '(')
     {
     }
       else
-    if (*signature == ')')
+    if (*s == ')')
     {
-      *is_void = (signature[1] == 'V') ? 1 : 0;
+      *is_void = (s[1] == 'V') ? 1 : 0;
       break;
     }
       else
-    if (*signature == '[')
+    if (*s == '[')
     {
       // The next char (or set of chars) should be the array type...
       // don't think anything else really needs to be done here.
     }
       else
-    if (*signature == 'L')
+    if (*s == 'L')
     {
-      while(*signature != ';' && *signature != 0)
+      while(*s != ';' && *s != 0)
       {
-        signature++; 
+        s++; 
       }
-      if (*signature == 0) { signature--; }
+      if (*s == 0) { s--; }
 
       (*params)++;
     }
@@ -106,16 +108,24 @@ void get_signature(char *signature, int *params, int *is_void)
       (*params)++;
     }
 
-    signature++;
+    s++;
   }
 }
 
-void get_static_function(char *function, char *method_name, char *method_sig)
+std::string get_static_function(
+  std::string &method_name,
+  std::string &method_sig)
 {
-char *s;
-int ptr = 0;
+  const char *s;
+  int ptr = 0;
 
-  s = method_name;
+  // function name length should be length of method_name plus 1 char
+  // for the _ in between plus method_sig length plus a NULL terminator
+  // at maximum.
+  char function[method_name.length() + method_sig.length() + 2];
+
+  s = method_name.c_str();
+
   while (*s != 0)
   {
     function[ptr++] = *s;
@@ -123,7 +133,9 @@ int ptr = 0;
   }
 
   function[ptr++] = '_';
-  s = method_sig + 1;
+
+  s = method_sig.c_str() + 1;
+
   while(*s != 0)
   {
     if (*s == ')') { break; }
@@ -148,6 +160,9 @@ int ptr = 0;
   }
 
   if (ptr > 1 && function[ptr-1] == '_') { function[ptr-1] = 0; }
+
   function[ptr] = 0;
+
+  return std::string(function);
 }
 

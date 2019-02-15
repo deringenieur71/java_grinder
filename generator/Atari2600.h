@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn, Joe Davisson
+ * Copyright 2014-2018 by Michael Kohn, Joe Davisson
  *
  */
 
-#ifndef _ATARI_2600_H
-#define _ATARI_2600_H
+#ifndef JAVA_GRINDER_GENERATOR_ATARI_2600_H
+#define JAVA_GRINDER_GENERATOR_ATARI_2600_H
 
-#include "M6502_8.h"
+#include "generator/M6502_8.h"
 
 class Atari2600 : public M6502_8
 {

@@ -1,17 +1,19 @@
 /**
-*  Java Grinder
-*  Author: Michael Kohn
-*   Email: mike@mikekohn.net
-*     Web: http://www.mikekohn.net/
-* License: GPL
-*
-* Copyright 2014-2016 by Michael Kohn
-*
-* CPC support started by Carsten Dost - https://github.com/deringenieur71
-*
-*/
-#ifndef _API_CPC_H
-#define _API_CPC_H
+ *  Java Grinder
+ *  Author: Michael Kohn
+ *   Email: mike@mikekohn.net
+ *     Web: http://www.mikekohn.net/
+ * License: GPLv3
+ *
+ * Copyright 2014-2018 by Michael Kohn
+ *
+ * CPC support started by Carsten Dost - https://github.com/deringenieur71
+ *
+ */
+
+#ifndef JAVA_GRINDER_GENERATOR_API_CPC_H
+#define JAVA_GRINDER_GENERATOR_API_CPC_H
+
 class API_CPC
 {
 public:

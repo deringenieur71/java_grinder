@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * Western Design Center SXB boards by Joe Davisson
  *
  */
 
-#ifndef _API_SXB_H
-#define _API_SXB_H
+#ifndef JAVA_GRINDER_GENERATOR_API_SXB_H
+#define JAVA_GRINDER_GENERATOR_API_SXB_H
 
 class API_SXB
 {

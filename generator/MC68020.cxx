@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,7 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "MC68020.h"
+#include "generator/MC68020.h"
 
 #define REG_STACK(a) (a)
 #define LOCALS(i) (i * 4)
@@ -58,9 +58,9 @@ int MC68020::array_read_byte()
   return 0;
 }
 
-int MC68020::array_read_byte(const char *name, int field_id)
+int MC68020::array_read_byte(std::string &name, int field_id)
 {
-  fprintf(out, "  movea.l (%s,a4), a2\n", name);
+  fprintf(out, "  movea.l (%s,a4), a2\n", name.c_str());
 
   if (stack > 0)
   {

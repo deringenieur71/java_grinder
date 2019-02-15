@@ -3,18 +3,18 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * W65C265SXB by Joe Davisson
  *
  */
 
-#ifndef _W65C265SXB_H
-#define _W65C265SXB_H
+#ifndef JAVA_GRINDER_GENERATOR_W65C265SXB_H
+#define JAVA_GRINDER_GENERATOR_W65C265SXB_H
 
-#include "W65816.h"
+#include "generator/W65816.h"
 
 class W65C265SXB : public W65816
 {

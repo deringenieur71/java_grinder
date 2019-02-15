@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "dsp.h"
+#include "api/dsp.h"
 
 #define CHECK_FUNC(funct) \
   if (strncmp(#funct, function, sizeof(#funct)-1) == 0) \
@@ -207,7 +206,7 @@ static int dsp_shiftB(JavaClass *java_class, Generator *generator)
   return generator->dsp_shiftB();
 }
 
-int dsp(JavaClass *java_class, Generator *generator, char *function)
+int dsp(JavaClass *java_class, Generator *generator, const char *function)
 {
   CHECK_FUNC(getA)
   CHECK_FUNC(getB)

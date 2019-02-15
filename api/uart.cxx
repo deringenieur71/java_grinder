@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "uart.h"
+#include "api/uart.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -29,7 +28,7 @@
     return generator->uart_##funct##sig(port, const_val); \
   }
 
-int uart(JavaClass *java_class, Generator *generator, char *method_name, int port)
+int uart(JavaClass *java_class, Generator *generator, const char *method_name, int port)
 {
   CHECK_FUNC(init,_I)
   CHECK_FUNC(send,_I)
@@ -40,7 +39,7 @@ int uart(JavaClass *java_class, Generator *generator, char *method_name, int por
   return -1;
 }
 
-int uart(JavaClass *java_class, Generator *generator, char *method_name, int port, int const_val)
+int uart(JavaClass *java_class, Generator *generator, const char *method_name, int port, int const_val)
 {
   CHECK_FUNC_CONST(init,_I)
 

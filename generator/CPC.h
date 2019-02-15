@@ -3,18 +3,18 @@
 *  Author: Michael Kohn
 *   Email: mike@mikekohn.net
 *     Web: http://www.mikekohn.net/
-* License: GPL
+* License: GPLv3
 *
-* Copyright 2014-2016 by Michael Kohn
+* Copyright 2014-2018 by Michael Kohn
 *
 * CPC support started by Carsten Dost  - https://github.com/deringenieur71
 *
 */
 
-#ifndef _CPC_H
-#define _CPC_H
+#ifndef JAVA_GRINDER_GENERATOR_CPC_H
+#define JAVA_GRINDER_GENERATOR_CPC_H
 
-#include "Z80.h"
+#include "generator/Z80.h"
 
 class CPC : public Z80
 {

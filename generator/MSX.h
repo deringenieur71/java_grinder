@@ -3,22 +3,21 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
-
 
 /*
  *   MSX support by Giovanni Nunes - https://github.com/plainspooky
  *                  Emiliano Fraga - https://github.com/efraga-msx
  */
 
-#ifndef _MSX_H
-#define _MSX_H
+#ifndef JAVA_GRINDER_GENERATOR_MSX_H
+#define JAVA_GRINDER_GENERATOR_MSX_H
 
-#include "Z80.h"
+#include "generator/Z80.h"
 
 class MSX : public Z80
 {

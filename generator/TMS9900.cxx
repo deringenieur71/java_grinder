@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <typeinfo>
 
-#include "TMS9900.h"
+#include "generator/TMS9900.h"
 
 #define LOCALS(i) (i * 2)
 #define CHECK_STACK() \
@@ -82,9 +82,9 @@ int TMS9900::start_init()
   return 0;
 }
 
-int TMS9900::insert_static_field_define(const char *name, const char *type, int index)
+int TMS9900::insert_static_field_define(std::string &name, std::string &type, int index)
 {
-  fprintf(out, "%s equ ram_start+%d\n", name, (index * 2) + 2);
+  fprintf(out, "%s equ ram_start+%d\n", name.c_str(), (index * 2) + 2);
   return 0;
 }
 
@@ -99,27 +99,27 @@ int TMS9900::init_heap(int field_count)
   return 0;
 }
 
-int TMS9900::field_init_int(char *name, int index, int value)
+int TMS9900::field_init_int(std::string &name, int index, int value)
 {
   if (value < -32768 || value > 65535) { return -1; }
   fprintf(out, "  li r0, %d\n", (int8_t)value);
-  fprintf(out, "  mov r0, @%s\n", name);
+  fprintf(out, "  mov r0, @%s\n", name.c_str());
 
   return 0;
 }
 
-int TMS9900::field_init_ref(char *name, int index)
+int TMS9900::field_init_ref(std::string &name, int index)
 {
-  fprintf(out, "  li r0, _%s\n", name);
-  fprintf(out, "  mov r0, @%s\n", name);
+  fprintf(out, "  li r0, _%s\n", name.c_str());
+  fprintf(out, "  mov r0, @%s\n", name.c_str());
   return 0;
 }
 
-void TMS9900::method_start(int local_count, int max_stack, int param_count, const char *name)
+void TMS9900::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
-  is_main = (strcmp(name, "main") == 0) ? 1 : 0;
+  is_main = (name == "main") ? 1 : 0;
 
-  fprintf(out, "%s:\n", name);
+  fprintf(out, "%s:\n", name.c_str());
 
   if (is_main)
   {
@@ -171,11 +171,11 @@ int TMS9900::push_local_var_ref(int index)
   return push_local_var_int(index);
 }
 
-int TMS9900::push_ref_static(const char *name, int index)
+int TMS9900::push_ref_static(std::string &name, int index)
 {
   CHECK_STACK();
 
-  fprintf(out, "  li r%d, _%s\n", REG_STACK(reg), name);
+  fprintf(out, "  li r%d, _%s\n", REG_STACK(reg), name.c_str());
   reg++;
 
   return 0;
@@ -212,29 +212,28 @@ int TMS9900::push_int(int32_t n)
   return 0;
 }
 
+#if 0
 int TMS9900::push_long(int64_t n)
 {
-  printf("long is not supported right now\n");
   return -1;
 }
 
 int TMS9900::push_float(float f)
 {
-  printf("float is not supported right now\n");
   return -1;
 }
 
 int TMS9900::push_double(double f)
 {
-  printf("double is not supported right now\n");
   return -1;
 }
+#endif
 
-int TMS9900::push_ref(char *name)
+int TMS9900::push_ref(std::string &name)
 {
   CHECK_STACK();
 
-  fprintf(out, "  mov @%s, r%d\n", name, REG_STACK(reg));
+  fprintf(out, "  mov @%s, r%d\n", name.c_str(), REG_STACK(reg));
   reg++;
 
   return 0;
@@ -562,7 +561,7 @@ int TMS9900::integer_to_short()
   return 0;
 }
 
-int TMS9900::jump_cond(const char *label, int cond, int distance)
+int TMS9900::jump_cond(std::string &label, int cond, int distance)
 {
   fprintf(out, "  ci r%d, 0\n", REG_STACK(reg-1));
   reg--;
@@ -609,7 +608,7 @@ int TMS9900::jump_cond(const char *label, int cond, int distance)
   return insert_conditional(label, cond, distance);
 }
 
-int TMS9900::jump_cond_integer(const char *label, int cond, int distance)
+int TMS9900::jump_cond_integer(std::string &label, int cond, int distance)
 {
   fprintf(out, "  c r%d, r%d\n", REG_STACK(reg-2), REG_STACK(reg-1));
   reg -= 2;
@@ -693,23 +692,23 @@ int TMS9900::return_void(int local_count)
   return 0;
 }
 
-int TMS9900::jump(const char *name, int distance)
+int TMS9900::jump(std::string &name, int distance)
 {
-  fprintf(out, "  ;; jump(%s,%d)\n", name, distance);
+  fprintf(out, "  ;; jump(%s,%d)\n", name.c_str(), distance);
 
   if (distance < 50)
   {
-    fprintf(out, "  jmp %s\n", name);
+    fprintf(out, "  jmp %s\n", name.c_str());
   }
     else
   {
-    fprintf(out, "  b @%s\n", name);
+    fprintf(out, "  b @%s\n", name.c_str());
   }
 
   return 0;
 }
 
-int TMS9900::call(const char *name)
+int TMS9900::call(std::string &name)
 {
   return -1;
 }
@@ -767,15 +766,15 @@ int TMS9900::invoke_static_method(const char *name, int params, int is_void)
   return 0;
 }
 
-int TMS9900::put_static(const char *name, int index)
+int TMS9900::put_static(std::string &name, int index)
 {
-  fprintf(out, "  mov r%d, @%s\n", REG_STACK(reg - 1), name);
+  fprintf(out, "  mov r%d, @%s\n", REG_STACK(reg - 1), name.c_str());
   reg--;
 
   return 0;
 }
 
-int TMS9900::get_static(const char *name, int index)
+int TMS9900::get_static(std::string &name, int index)
 {
   return -1;
 }
@@ -807,22 +806,28 @@ int TMS9900::new_array(uint8_t type)
   return 0;
 }
 
-int TMS9900::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int TMS9900::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   fprintf(out, ".align 16\n");
   if (type == TYPE_BYTE)
-  { return insert_db(name, data, len, TYPE_SHORT); }
+  {
+    return insert_db(name, data, len, TYPE_SHORT);
+  }
     else
   if (type == TYPE_SHORT)
-  { return insert_dw(name, data, len, TYPE_SHORT); } 
+  {
+    return insert_dw(name, data, len, TYPE_SHORT);
+  }
     else
   if (type == TYPE_INT)
-  { return insert_dw(name, data, len, TYPE_SHORT); } 
+  {
+    return insert_dw(name, data, len, TYPE_SHORT);
+  }
 
   return -1;
 }
 
-int TMS9900::insert_string(const char *name, uint8_t *bytes, int len)
+int TMS9900::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   fprintf(out, ".align 16\n");
   fprintf(out, "  dc16 %d\n", len);
@@ -836,9 +841,9 @@ int TMS9900::push_array_length()
   return 0;
 }
 
-int TMS9900::push_array_length(const char *name, int field_id)
+int TMS9900::push_array_length(std::string &name, int field_id)
 {
-  fprintf(out, "  mov &%s, r0\n", name);
+  fprintf(out, "  mov &%s, r0\n", name.c_str());
   fprintf(out, "  mov @-2(r0), r%d\n", REG_STACK(reg));
   return 0;
 }
@@ -870,10 +875,10 @@ int TMS9900::array_read_int()
   return array_read_short();
 }
 
-int TMS9900::array_read_byte(const char *name, int field_id)
+int TMS9900::array_read_byte(std::string &name, int field_id)
 {
-  fprintf(out, "  ;; array_read_byte(%s,%d)\n", name, field_id);
-  fprintf(out, "  mov @%s, r13\n", name);
+  fprintf(out, "  ;; array_read_byte(%s,%d)\n", name.c_str(), field_id);
+  fprintf(out, "  mov @%s, r13\n", name.c_str());
   fprintf(out, "  a r%d, r13\n", REG_STACK(reg-1));
   fprintf(out, "  movb *r13, r%d\n", REG_STACK(reg-1));
   fprintf(out, "  swpb r%d\n", REG_STACK(reg-1));
@@ -883,17 +888,17 @@ int TMS9900::array_read_byte(const char *name, int field_id)
   return 0;
 }
 
-int TMS9900::array_read_short(const char *name, int field_id)
+int TMS9900::array_read_short(std::string &name, int field_id)
 {
-  fprintf(out, "  ;; array_read_short(%s,%d)\n", name, field_id);
-  fprintf(out, "  mov @%s, r13\n", name);
+  fprintf(out, "  ;; array_read_short(%s,%d)\n", name.c_str(), field_id);
+  fprintf(out, "  mov @%s, r13\n", name.c_str());
   fprintf(out, "  sla r%d\n", REG_STACK(reg-1));
   fprintf(out, "  a r%d, r13\n", REG_STACK(reg-1));
   fprintf(out, "  mov @r13, r%d\n", REG_STACK(reg-1));
   return 0;
 }
 
-int TMS9900::array_read_int(const char *name, int field_id)
+int TMS9900::array_read_int(std::string &name, int field_id)
 {
   return array_read_short(name, field_id);
 }
@@ -923,24 +928,24 @@ int TMS9900::array_write_int()
   return array_write_short();
 }
 
-int TMS9900::array_write_byte(const char *name, int field_id)
+int TMS9900::array_write_byte(std::string &name, int field_id)
 {
-  fprintf(out, "  ;; array_write_byte(%s,%d)\n", name, field_id);
-  fprintf(out, "  a @%s, r%d\n", name, REG_STACK(reg-2));
+  fprintf(out, "  ;; array_write_byte(%s,%d)\n", name.c_str(), field_id);
+  fprintf(out, "  a @%s, r%d\n", name.c_str(), REG_STACK(reg-2));
   fprintf(out, "  movb r%d, *r%d\n", REG_STACK(reg-1), REG_STACK(reg-2));
   return 0;
 }
 
-int TMS9900::array_write_short(const char *name, int field_id)
+int TMS9900::array_write_short(std::string &name, int field_id)
 {
-  fprintf(out, "  ;; array_write_short(%s,%d)\n", name, field_id);
+  fprintf(out, "  ;; array_write_short(%s,%d)\n", name.c_str(), field_id);
   fprintf(out, "  sla r%d, 1\n", REG_STACK(reg-2));
-  fprintf(out, "  a @%s, r%d\n", name, REG_STACK(reg-2));
+  fprintf(out, "  a @%s, r%d\n", name.c_str(), REG_STACK(reg-2));
   fprintf(out, "  mov r%d, *r%d\n", REG_STACK(reg-1), REG_STACK(reg-2));
   return 0;
 }
 
-int TMS9900::array_write_int(const char *name, int field_id)
+int TMS9900::array_write_int(std::string &name, int field_id)
 {
   return array_write_short(name, field_id);
 }
@@ -955,7 +960,7 @@ void TMS9900::sign_extend()
   label_count++;
 }
 
-int TMS9900::insert_conditional(const char *label, int cond, int distance)
+int TMS9900::insert_conditional(std::string &label, int cond, int distance)
 {
   bool reverse_cond = false;
 
@@ -978,14 +983,14 @@ int TMS9900::insert_conditional(const char *label, int cond, int distance)
   {
     if (!reverse_cond)
     {
-      fprintf(out, "  jlt %s\n", label);
-      fprintf(out, "  jeq %s\n", label);
+      fprintf(out, "  jlt %s\n", label.c_str());
+      fprintf(out, "  jeq %s\n", label.c_str());
     }
       else
     {
       fprintf(out, "  jlt _label_%d\n", label_count);
       fprintf(out, "  jeq _label_%d\n", label_count);
-      fprintf(out, "  b @%s\n", label);
+      fprintf(out, "  b @%s\n", label.c_str());
       fprintf(out, "_label_%d:\n", label_count);
       label_count++;
     }
@@ -995,14 +1000,14 @@ int TMS9900::insert_conditional(const char *label, int cond, int distance)
   {
     if (!reverse_cond)
     {
-      fprintf(out, "  jgt %s\n", label);
-      fprintf(out, "  jeq %s\n", label);
+      fprintf(out, "  jgt %s\n", label.c_str());
+      fprintf(out, "  jeq %s\n", label.c_str());
     }
       else
     {
       fprintf(out, "  jgt _label_%d\n", label_count);
       fprintf(out, "  jeq _label_%d\n", label_count);
-      fprintf(out, "  b @%s\n", label);
+      fprintf(out, "  b @%s\n", label.c_str());
       fprintf(out, "_label_%d:\n", label_count);
       label_count++;
     }
@@ -1011,12 +1016,12 @@ int TMS9900::insert_conditional(const char *label, int cond, int distance)
   {
     if (!reverse_cond)
     {
-      fprintf(out, "  %s %s\n", cond_str[cond], label);
+      fprintf(out, "  %s %s\n", cond_str[cond], label.c_str());
     }
       else
     {
       fprintf(out, "  %s _label_%d\n", cond_str[cond], label_count);
-      fprintf(out, "  b @%s\n", label);
+      fprintf(out, "  b @%s\n", label.c_str());
       fprintf(out, "_label_%d:\n", label_count);
       label_count++;
     }

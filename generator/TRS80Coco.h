@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _TRS80_COCO_H
-#define _TRS80_COCO_H
+#ifndef JAVA_GRINDER_GENERATOR_TRS80_COCO_H
+#define JAVA_GRINDER_GENERATOR_TRS80_COCO_H
 
-#include "MC6809.h"
+#include "generator/MC6809.h"
 
 class TRS80Coco : public MC6809
 {

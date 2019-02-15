@@ -3,17 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _MSP430X_H
-#define _MSP430X_H
+#ifndef JAVA_GRINDER_GENERATOR_MSP430X_H
+#define JAVA_GRINDER_GENERATOR_MSP430X_H
 
-#include "Generator.h"
-#include "MSP430.h"
+#include "generator/MSP430.h"
 
 class MSP430X : public MSP430
 {

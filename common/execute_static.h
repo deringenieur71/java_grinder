@@ -3,17 +3,17 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _EXECUTE_STATIC_H
-#define _EXECUTE_STATIC_H
+#ifndef JAVA_GRINDER_COMMON_EXECUTE_STATIC_H
+#define JAVA_GRINDER_COMMON_EXECUTE_STATIC_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include "common/JavaClass.h"
+#include "generator/Generator.h"
 
 int execute_static(JavaClass *java_class, int method_id, Generator *generator, bool do_arrays, bool verbose, JavaClass *parent_class=NULL);
 

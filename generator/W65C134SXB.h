@@ -3,18 +3,18 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * W65C134SXB by Joe Davisson
  *
  */
 
-#ifndef _W65C134SXB_H
-#define _W65C134SXB_H
+#ifndef JAVA_GRINDER_GENERATOR_W65C134SXB_H
+#define JAVA_GRINDER_GENERATOR_W65C134SXB_H
 
-#include "M6502.h"
+#include "generator/M6502.h"
 
 class W65C134SXB : public M6502
 {

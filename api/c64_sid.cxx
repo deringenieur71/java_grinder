@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "cpu.h"
+#include "api/cpu.h"
 
 #define CHECK_FUNC(funct) \
   if (strncmp(#funct, function, sizeof(#funct)-1) == 0) \
@@ -113,7 +112,7 @@ static int c64_sid_clear(JavaClass *java_class, Generator *generator)
   return generator->c64_sid_clear();
 }
 
-int c64_sid(JavaClass *java_class, Generator *generator, char *function)
+int c64_sid(JavaClass *java_class, Generator *generator, const char *function)
 {
   CHECK_FUNC(voice1_frequency)
   CHECK_FUNC(voice1_pulse_width)

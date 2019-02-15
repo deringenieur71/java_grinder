@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _PIC32_H
-#define _PIC32_H
+#ifndef JAVA_GRINDER_GENERATOR_PIC32_H
+#define JAVA_GRINDER_GENERATOR_PIC32_H
 
-#include "MIPS32.h"
+#include "generator/MIPS32.h"
 
 class PIC32 : public MIPS32
 {

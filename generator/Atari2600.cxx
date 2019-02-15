@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn, Joe Davisson
+ * Copyright 2014-2018 by Michael Kohn, Joe Davisson
  *
  */
 
@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "Atari2600.h"
+#include "generator/Atari2600.h"
 
 // http://www.alienbill.com/2600/101/docs/stella.html
 // http://problemkaputt.de/2k6specs.htm

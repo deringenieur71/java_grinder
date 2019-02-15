@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn, Joe Davisson
+ * Copyright 2014-2018 by Michael Kohn, Joe Davisson
  *
  * C64 written by Joe Davisson
  *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "C64.h"
+#include "generator/C64.h"
 
 #define POKE(dst) \
   POP_HI(); \

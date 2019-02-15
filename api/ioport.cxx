@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "ioport.h"
+#include "api/ioport.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -29,7 +28,7 @@
     return generator->ioport_##funct##sig(port, const_val); \
   }
 
-int ioport(JavaClass *java_class, Generator *generator, char *method_name, int port)
+int ioport(JavaClass *java_class, Generator *generator, const char *method_name, int port)
 {
   CHECK_FUNC(setPinsAsInput,_I)
   CHECK_FUNC(setPinsAsOutput,_I)
@@ -48,7 +47,7 @@ int ioport(JavaClass *java_class, Generator *generator, char *method_name, int p
   return -1;
 }
 
-int ioport(JavaClass *java_class, Generator *generator, char *method_name, int port, int const_val)
+int ioport(JavaClass *java_class, Generator *generator, const char *method_name, int port, int const_val)
 {
   CHECK_FUNC_CONST(setPinsAsInput,_I)
   CHECK_FUNC_CONST(setPinsAsOutput,_I)

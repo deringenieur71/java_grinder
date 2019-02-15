@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,7 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "STDC.h"
+#include "generator/STDC.h"
 
 #define REG_STACK(a) (reg)
 #define LOCALS(i) (i * 4)
@@ -57,9 +57,9 @@ int STDC::start_init()
   return 0;
 }
 
-int STDC::insert_static_field_define(const char *name, const char *type, int index)
+int STDC::insert_static_field_define(std::string &name, std::string &type, int index)
 {
-  fprintf(out, "static int32_t %s;\n", name);
+  fprintf(out, "static int32_t %s;\n", name.c_str());
 
   return 0;
 }
@@ -79,31 +79,31 @@ int n;
   return 0;
 }
 
-int STDC::field_init_int(char *name, int index, int value)
+int STDC::field_init_int(std::string &name, int index, int value)
 {
-  fprintf(out, "  %s = %d;\n", name, value);
+  fprintf(out, "  %s = %d;\n", name.c_str(), value);
 
   return 0;
 }
 
-int STDC::field_init_ref(char *name, int index)
+int STDC::field_init_ref(std::string &name, int index)
 {
-  fprintf(out, "  %s = (int)_%s;\n", name, name);
+  fprintf(out, "  %s = (int)_%s;\n", name.c_str(), name.c_str());
 
   return 0;
 }
 
-void STDC::method_start(int local_count, int max_stack, int param_count, const char *name)
+void STDC::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
 int n;
 
-  if (strcmp(name, "main") == 0)
+  if (name == "main")
   {
     fprintf(out, "}\n\n");
     is_main = true;
   }
 
-  fprintf(out, "int32_t %s(", name);
+  fprintf(out, "int32_t %s(", name.c_str());
   for (n = 0; n < param_count; n++)
   {
     if (n != 0) { fprintf(out, ", "); }
@@ -149,7 +149,7 @@ int STDC::push_local_var_ref(int index)
   return 0;
 }
 
-int STDC::push_ref_static(const char *name, int index)
+int STDC::push_ref_static(std::string &name, int index)
 {
   return -1;
 }
@@ -174,6 +174,7 @@ int STDC::set_integer_local(int index, int value)
   return 0;
 }
 
+#if 0
 int STDC::push_long(int64_t n)
 {
   return -1;
@@ -188,10 +189,11 @@ int STDC::push_double(double f)
 {
   return -1;
 }
+#endif
 
-int STDC::push_ref(char *name)
+int STDC::push_ref(std::string &name)
 {
-  fprintf(out, "  stack_%d = *%s;\n", stack++, name);
+  fprintf(out, "  stack_%d = *%s;\n", stack++, name.c_str());
 
   return 0;
 }
@@ -417,16 +419,16 @@ int STDC::integer_to_short()
   return 0;
 }
 
-int STDC::jump_cond(const char *label, int cond, int distance)
+int STDC::jump_cond(std::string &label, int cond, int distance)
 {
-  fprintf(out, "  if (stack_%d %s 0) { goto %s; }\n", stack--, cond_str[cond], label);
+  fprintf(out, "  if (stack_%d %s 0) { goto %s; }\n", stack--, cond_str[cond], label.c_str());
 
   return 0;
 }
 
-int STDC::jump_cond_integer(const char *label, int cond, int distance)
+int STDC::jump_cond_integer(std::string &label, int cond, int distance)
 {
-  fprintf(out, "  if (stack_%d %s stack_%d) { goto %s; }\n", stack - 2, cond_str[cond], stack - 1, label);
+  fprintf(out, "  if (stack_%d %s stack_%d) { goto %s; }\n", stack - 2, cond_str[cond], stack - 1, label.c_str());
   stack -= 2;
 
   return 0;
@@ -463,14 +465,14 @@ int STDC::return_void(int local_count)
   return 0;
 }
 
-int STDC::jump(const char *name, int distance)
+int STDC::jump(std::string &name, int distance)
 {
-  fprintf(out, "  goto %s;\n", name);
+  fprintf(out, "  goto %s;\n", name.c_str());
 
   return 0;
 }
 
-int STDC::call(const char *name)
+int STDC::call(std::string &name)
 {
   //fprintf(out, "  stack_%d = %s();\n", stack++, name);
 
@@ -494,15 +496,15 @@ int n;
   return 0;
 }
 
-int STDC::put_static(const char *name, int index)
+int STDC::put_static(std::string &name, int index)
 {
-  fprintf(out, "  %s = stack_%d;\n", name, stack++);
+  fprintf(out, "  %s = stack_%d;\n", name.c_str(), stack++);
   return 0;
 }
 
-int STDC::get_static(const char *name, int index)
+int STDC::get_static(std::string &name, int index)
 {
-  fprintf(out, "  stack_%d = %s;\n", --stack, name);
+  fprintf(out, "  stack_%d = %s;\n", --stack, name.c_str());
   return 0;
 }
 
@@ -541,12 +543,12 @@ int STDC::new_array(uint8_t type)
   return 0;
 }
 
-int STDC::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int STDC::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   return -1;
 }
 
-int STDC::insert_string(const char *name, uint8_t *bytes, int len)
+int STDC::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   return -1;
 }
@@ -556,9 +558,9 @@ int STDC::push_array_length()
   return -1;
 }
 
-int STDC::push_array_length(const char *name, int field_id)
+int STDC::push_array_length(std::string &name, int field_id)
 {
-  fprintf(out, "  stack_%d = ((int32_t *)%s)[-1];\n", stack - 1, name);
+  fprintf(out, "  stack_%d = ((int32_t *)%s)[-1];\n", stack - 1, name.c_str());
   return 0;
 }
 
@@ -577,21 +579,21 @@ int STDC::array_read_int()
   return -1;
 }
 
-int STDC::array_read_byte(const char *name, int field_id)
+int STDC::array_read_byte(std::string &name, int field_id)
 {
-  fprintf(out, "  stack_%d = ((int8_t *)%s)[stack_%d];\n", stack - 1, name, stack - 1);
+  fprintf(out, "  stack_%d = ((int8_t *)%s)[stack_%d];\n", stack - 1, name.c_str(), stack - 1);
   return 0;
 }
 
-int STDC::array_read_short(const char *name, int field_id)
+int STDC::array_read_short(std::string &name, int field_id)
 {
-  fprintf(out, "  stack_%d = ((int16_t *)%s)[stack_%d];\n", stack - 1, name, stack - 1);
+  fprintf(out, "  stack_%d = ((int16_t *)%s)[stack_%d];\n", stack - 1, name.c_str(), stack - 1);
   return 0;
 }
 
-int STDC::array_read_int(const char *name, int field_id)
+int STDC::array_read_int(std::string &name, int field_id)
 {
-  fprintf(out, "  stack_%d = ((int32_t *)%s)[stack_%d];\n", stack - 1, name, stack - 1);
+  fprintf(out, "  stack_%d = ((int32_t *)%s)[stack_%d];\n", stack - 1, name.c_str(), stack - 1);
   return 0;
 }
 
@@ -610,23 +612,23 @@ int STDC::array_write_int()
   return -1;
 }
 
-int STDC::array_write_byte(const char *name, int field_id)
+int STDC::array_write_byte(std::string &name, int field_id)
 {
-  fprintf(out, "  ((int8_t *)%s)[stack_%d] = stack_%d;\n", name, stack - 2, stack - 1);
+  fprintf(out, "  ((int8_t *)%s)[stack_%d] = stack_%d;\n", name.c_str(), stack - 2, stack - 1);
   stack -= 2;
   return 0;
 }
 
-int STDC::array_write_short(const char *name, int field_id)
+int STDC::array_write_short(std::string &name, int field_id)
 {
-  fprintf(out, "  ((int16_t *)%s)[stack_%d] = stack_%d;\n", name, stack - 2, stack - 1);
+  fprintf(out, "  ((int16_t *)%s)[stack_%d] = stack_%d;\n", name.c_str(), stack - 2, stack - 1);
   stack -= 2;
   return 0;
 }
 
-int STDC::array_write_int(const char *name, int field_id)
+int STDC::array_write_int(std::string &name, int field_id)
 {
-  fprintf(out, "  ((int32_t *)%s)[stack_%d] = stack_%d;\n", name, stack - 2, stack - 1);
+  fprintf(out, "  ((int32_t *)%s)[stack_%d] = stack_%d;\n", name.c_str(), stack - 2, stack - 1);
   stack -= 2;
   return 0;
 }

@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _MC68020_H
-#define _MC68020_H
+#ifndef JAVA_GRINDER_GENERATOR_MC68020_H
+#define JAVA_GRINDER_GENERATOR_MC68020_H
 
-#include "MC68000.h"
+#include "generator/MC68000.h"
 
 class MC68020 : public MC68000
 {
@@ -22,7 +22,7 @@ public:
 
   virtual int integer_to_byte();
   virtual int array_read_byte();
-  virtual int array_read_byte(const char *name, int field_id);
+  virtual int array_read_byte(std::string &name, int field_id);
   virtual int mul_integer();
   virtual int mul_integer(int num);
   virtual int div_integer();

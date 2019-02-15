@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "cpu.h"
+#include "api/cpu.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -48,8 +47,9 @@ static int cpu_asm(JavaClass *java_class, Generator *generator, int const_index)
   return generator->cpu_asm_X((const char *)constant_utf8->bytes, constant_utf8->length);
 }
 
-int cpu(JavaClass *java_class, Generator *generator, char *method_name)
+int cpu(JavaClass *java_class, Generator *generator, const char *method_name)
 {
+  CHECK_FUNC(setClock8,)
   CHECK_FUNC(setClock16,)
   CHECK_FUNC(setClock25,)
   CHECK_FUNC(setClockExternal2,)
@@ -59,7 +59,7 @@ int cpu(JavaClass *java_class, Generator *generator, char *method_name)
   return -1;
 }
 
-int cpu(JavaClass *java_class, Generator *generator, char *method_name, int const_val)
+int cpu(JavaClass *java_class, Generator *generator, const char *method_name, int const_val)
 {
   CHECK_FUNC_CONST_STRING(asm,_X)
   return -1;

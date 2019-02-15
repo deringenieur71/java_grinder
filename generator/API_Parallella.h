@@ -5,12 +5,12 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _API_PARALLELLA_H
-#define _API_PARALLELLA_H
+#ifndef JAVA_GRINDER_GENERATOR_API_PARALLELLA_H
+#define JAVA_GRINDER_GENERATOR_API_PARALLELLA_H
 
 class API_Parallella
 {

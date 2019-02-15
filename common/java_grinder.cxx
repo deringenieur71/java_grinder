@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -13,43 +13,44 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Generator.h"
-#include "Compiler.h"
-#include "JavaCompiler.h"
-#include "execute_static.h"
-#include "AppleIIgs.h"
-#include "ARM.h"
-#include "Atari2600.h"
-#include "AVR8.h"
-#include "C64.h"
-#include "CPC.h"
-#include "DSPIC.h"
-#include "Epiphany.h"
-#include "M6502.h"
-#include "M6502_8.h"
-#include "MC68000.h"
-#include "MIPS32.h"
-#include "MSP430.h"
-#include "MSP430X.h"
-#include "MCS51.h"
-#include "MSX.h"
-#include "PIC32.h"
-#include "Playstation2.h"
-#include "Propeller.h"
-#include "SegaGenesis.h"
-#include "SNES.h"
-#include "STDC.h"
-#include "TI84.h"
-#include "TI99.h"
-#include "TMS9900.h"
-#include "TRS80Coco.h"
-#include "W65816.h"
-#include "W65C134SXB.h"
-#include "W65C265SXB.h"
-#include "X86.h"
-#include "X86_64.h"
-#include "Z80.h"
-#include "version.h"
+#include "common/Compiler.h"
+#include "common/JavaCompiler.h"
+#include "common/execute_static.h"
+#include "common/version.h"
+#include "generator/Amiga.h"
+#include "generator/AppleIIgs.h"
+#include "generator/ARM.h"
+#include "generator/Atari2600.h"
+#include "generator/AVR8.h"
+#include "generator/C64.h"
+#include "generator/CPC.h"
+#include "generator/DotNet.h"
+#include "generator/DSPIC.h"
+#include "generator/Epiphany.h"
+#include "generator/M6502.h"
+#include "generator/M6502_8.h"
+#include "generator/MC68000.h"
+#include "generator/MIPS32.h"
+#include "generator/MSP430.h"
+#include "generator/MSP430X.h"
+#include "generator/MCS51.h"
+#include "generator/MSX.h"
+#include "generator/PIC32.h"
+#include "generator/Playstation2.h"
+#include "generator/Propeller.h"
+#include "generator/SegaGenesis.h"
+#include "generator/SNES.h"
+#include "generator/STDC.h"
+#include "generator/TI84.h"
+#include "generator/TI99.h"
+#include "generator/TMS9900.h"
+#include "generator/TRS80Coco.h"
+#include "generator/W65816.h"
+#include "generator/W65C134SXB.h"
+#include "generator/W65C265SXB.h"
+#include "generator/X86.h"
+#include "generator/X86_64.h"
+#include "generator/Z80.h"
 
 #define STACK_LEN 65536
 
@@ -62,6 +63,10 @@ static Generator *new_generator(const char *chip_type)
     generator = new MCS51();
   }
     else
+  if (strcasecmp("amiga", chip_type) == 0)
+  {
+    generator = new Amiga();
+  }
   if (strcasecmp("appleiigs", chip_type) == 0)
   {
     generator = new AppleIIgs();
@@ -115,6 +120,11 @@ static Generator *new_generator(const char *chip_type)
   if (strcasecmp("cpc", chip_type) == 0)
   {
     generator = new CPC();
+  }
+    else
+  if (strcasecmp("dotnet", chip_type) == 0)
+  {
+    generator = new DotNet();
   }
     else
   if (strcasecmp("dspic30f3012", chip_type) == 0)
@@ -254,7 +264,7 @@ static Generator *new_generator(const char *chip_type)
     else
   if (strcasecmp("x86_64", chip_type) == 0)
   {
-    generator = new X86();
+    generator = new X86_64();
   }
     else
   if (strcasecmp("z80", chip_type) == 0)
@@ -300,7 +310,7 @@ int main(int argc, char *argv[])
            "     sega_genesis\n"
            "     ti99\n"
            "     w65c134sxb, w65c265sxb\n"
-           "     x86\n"
+           "     x86, x86_64\n"
            "     z80, cpc, msx, ti84plus\n", argv[0]);
     exit(0);
   }

@@ -3,21 +3,21 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _SEGA_GENESIS_H
-#define _SEGA_GENESIS_H
+#ifndef JAVA_GRINDER_API_SEGA_GENESIS_H
+#define JAVA_GRINDER_API_SEGA_GENESIS_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include "common/JavaClass.h"
+#include "generator/Generator.h"
 
-int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name);
-int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name, int const_val);
-int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name, int const_val1, int const_val2);
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *method_name);
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *method_name, int const_val);
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *method_name, int const_val1, int const_val2);
 
 #endif
 

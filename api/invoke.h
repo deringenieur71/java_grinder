@@ -3,20 +3,22 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _INVOKE_H
-#define _INVOKE_H
+#ifndef JAVA_GRINDER_API_INVOKE_H
+#define JAVA_GRINDER_API_INVOKE_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include <string>
 
-void get_signature(char *signature, int *params, int *is_void);
-void get_static_function(char *function, char *method_name, char *method_sig);
+void get_signature(std::string &signature, int *params, int *is_void);
+
+std::string get_static_function(
+  std::string &method_name,
+  std::string &method_sig);
 
 #endif
 

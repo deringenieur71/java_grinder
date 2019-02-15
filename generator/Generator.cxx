@@ -3,19 +3,20 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#include "DSPIC.h"
-#include "MSP430.h"
-#include "Generator.h"
+#include "generator/Generator.h"
 
 Generator::Generator() : label_count(0)
 {
@@ -23,6 +24,8 @@ Generator::Generator() : label_count(0)
 
 Generator::~Generator()
 {
+  add_array_files();
+
   fprintf(out, "\n");
   fclose(out);
 }
@@ -40,6 +43,12 @@ int Generator::open(const char *filename)
   return 0;
 }
 
+int Generator::new_object_array(std::string &class_name)
+{
+  printf("Error: Object arrays are not supported on this platform.\n");
+  return -1;
+}
+
 int Generator::push_local_var_float(int index)
 {
   printf("Error: Floats are not supported on this platform.\n");
@@ -49,6 +58,24 @@ int Generator::push_local_var_float(int index)
 int Generator::set_float_local(int index, float value)
 {
   printf("Error: Floats are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::push_long(int64_t n)
+{
+  printf("Error: Longs are not currently supported on this platform.\n");
+  return -1;
+}
+
+int Generator::push_float(float f)
+{
+  printf("Error: Floats are not currently supported on this platform.\n");
+  return -1;
+}
+
+int Generator::push_double(double f)
+{
+  printf("Error: Doubles are not currently supported on this platform.\n");
   return -1;
 }
 
@@ -70,21 +97,93 @@ int Generator::mul_float()
   return -1;
 }
 
+int Generator::div_float()
+{
+  printf("Error: Floats are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::neg_float()
+{
+  printf("Error: Floats are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::float_to_integer()
+{
+  printf("Error: Floats are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::integer_to_float()
+{
+  printf("Error: Floats are not supported on this platform.\n");
+  return -1;
+}
+
 int Generator::compare_floats(int cond)
 {
   printf("Error: Floats are not supported on this platform.\n");
   return -1;
 }
 
-int Generator::new_object(const char *object_name, int field_count)
+int Generator::array_read_float()
+{
+  printf("Error: Float arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_read_object()
+{
+  printf("Error: Object arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_read_float(std::string &name, int field_id)
+{
+  printf("Error: Float arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_read_object(std::string &name, int field_id)
+{
+  printf("Error: Object arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_write_float()
+{
+  printf("Error: Float arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_write_object()
+{
+  printf("Error: Object arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_write_float(std::string &name, int field_id)
+{
+  printf("Error: Float arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::array_write_object(std::string &name, int field_id)
+{
+  printf("Error: Object arrays are not supported on this platform.\n");
+  return -1;
+}
+
+int Generator::new_object(std::string &object_name, int field_count)
 {
   printf("Error: Object instantiation is not supported on this platform.\n");
   return -1;
 }
 
-void Generator::label(char *name)
+void Generator::label(std::string &name)
 {
-  fprintf(out, "%s:\n", name);
+  fprintf(out, "%s:\n", name.c_str());
 }
 
 void Generator::add_newline()
@@ -92,22 +191,21 @@ void Generator::add_newline()
   fprintf(out, "\n");
 }
 
-int Generator::insert_db(const char *name, int32_t *data, int len, uint8_t len_type)
+int Generator::insert_db(std::string &name, int32_t *data, int len, uint8_t len_type)
 {
-  int n;
-
   if (len_type == TYPE_SHORT)
   {
-    fprintf(out, "  dw %d   ; %s.length\n", len, name);
+    fprintf(out, "  dw %d   ; %s.length\n", len, name.c_str());
   }
     else
   if (len_type == TYPE_INT)
   {
-    fprintf(out, "  dc32 %d   ; %s.length\n", len, name);
+    fprintf(out, "  dc32 %d   ; %s.length\n", len, name.c_str());
   }
-  fprintf(out, "_%s:\n", name);
 
-  for (n = 0; n < len; n++)
+  fprintf(out, "_%s:\n", name.c_str());
+
+  for (int n = 0; n < len; n++)
   {
     if ((n % 8) == 0) { fprintf(out, "  db"); }
     else { fprintf(out, ","); }
@@ -127,22 +225,20 @@ int Generator::insert_db(const char *name, int32_t *data, int len, uint8_t len_t
   return 0;
 }
 
-int Generator::insert_dw(const char *name, int32_t *data, int len, uint8_t len_type)
+int Generator::insert_dw(std::string &name, int32_t *data, int len, uint8_t len_type)
 {
-  int n;
-
   if (len_type == TYPE_SHORT)
   {
-    fprintf(out, "  dw %d   ; %s.length\n", len, name);
+    fprintf(out, "  dw %d   ; %s.length\n", len, name.c_str());
   }
     else
   if (len_type == TYPE_INT)
   {
-    fprintf(out, "  dc32 %d   ; %s.length\n", len, name);
+    fprintf(out, "  dc32 %d   ; %s.length\n", len, name.c_str());
   }
-  fprintf(out, "_%s:\n", name);
+  fprintf(out, "_%s:\n", name.c_str());
 
-  for (n = 0; n < len; n++)
+  for (int n = 0; n < len; n++)
   {
     if ((n % 8) == 0) { fprintf(out, "  dw"); }
     else { fprintf(out, ","); }
@@ -163,29 +259,58 @@ int Generator::insert_dw(const char *name, int32_t *data, int len, uint8_t len_t
   return 0;
 }
 
-int Generator::insert_dc32(const char *name, int32_t *data, int len, uint8_t len_type, const char *dc32)
+int Generator::insert_dc32(std::string &name, int32_t *data, int len, uint8_t len_type, const char *dc32)
 {
-  int n;
-
   // FIXME: For dc32, the len_type should be dc32 always.
   if (len_type == TYPE_SHORT)
   {
-    fprintf(out, "  dw %d   ; %s.length\n", len, name);
+    fprintf(out, "  dw %d   ; %s.length\n", len, name.c_str());
   }
     else
   if (len_type == TYPE_INT)
   {
-    fprintf(out, "  %s %d   ; %s.length\n", dc32, len, name);
+    fprintf(out, "  %s %d   ; %s.length\n", dc32, len, name.c_str());
   }
 
-  fprintf(out, "_%s:\n", name);
+  fprintf(out, "_%s:\n", name.c_str());
 
-  for (n = 0; n < len; n++)
+  for (int n = 0; n < len; n++)
   {
     if ((n % 8) == 0) { fprintf(out, "  %s", dc32); }
     else { fprintf(out, ","); }
 
     fprintf(out, " 0x%04x", (uint32_t)data[n]);
+
+    if (((n + 1) % 8) == 0) { fprintf(out, "\n"); }
+  }
+
+  fprintf(out, "\n\n");
+
+  return 0;
+}
+
+int Generator::insert_float(std::string &name, int32_t *data, int len, uint8_t len_type, const char *dc32)
+{
+  // FIXME: For dc32, the len_type should be dc32 always.
+  if (len_type == TYPE_SHORT)
+  {
+    fprintf(out, "  dw %d   ; %s.length\n", len, name.c_str());
+  }
+    else
+  if (len_type == TYPE_INT)
+  {
+    fprintf(out, "  %s %d   ; %s.length\n", dc32, len, name.c_str());
+  }
+
+  fprintf(out, "_%s:\n", name.c_str());
+
+  for (int n = 0; n < len; n++)
+  {
+    if ((n % 8) == 0) { fprintf(out, "  %s", dc32); }
+    else { fprintf(out, ","); }
+
+    float *a = (float *)&data[n];
+    fprintf(out, " %f", *a);
 
     if (((n + 1) % 8) == 0) { fprintf(out, "\n"); }
   }
@@ -249,12 +374,13 @@ void Generator::insert_constants_pool()
   fprintf(out, "\n\n");
 }
 
-int Generator::insert_utf8(const char *name, uint8_t *bytes, int len)
+int Generator::insert_utf8(std::string &name, uint8_t *bytes, int len)
 {
   int n;
 
-  fprintf(out, "_%s:\n", name);
+  fprintf(out, "_%s:\n", name.c_str());
   fprintf(out, "  db \"");
+
   for (n = 0; n < len; n++)
   {
     if (bytes[n] == '\n')
@@ -289,4 +415,48 @@ int Generator::cpu_asm_X(const char *code, int len)
   return 0;
 }
 
+int Generator::use_array_file(const char *filename, const char *array, int type)
+{
+   ArrayFiles array_file;
+
+  if (preload_arrays.find(filename) != preload_arrays.end()) { return 0; }
+
+  array_file.name = array;
+  array_file.type = type;
+
+  preload_arrays[filename] = array_file;
+
+  return 0;
+}
+
+int Generator::add_array_files()
+{
+  struct stat statbuf;
+  std::map<std::string, ArrayFiles>::iterator iter;
+
+  const char *constant = "dc32";
+
+  if (get_int_size() == 16) { constant = "dc16"; }
+  else if (get_int_size() == 8) { constant = "dc8"; }
+
+  for (iter = preload_arrays.begin(); iter != preload_arrays.end(); iter++)
+  {
+    if (stat(iter->first.c_str(), &statbuf) != 0)
+    {
+      printf("Error opening %s\n", iter->first.c_str());
+      return -1;
+    }
+
+    fprintf(out, ".align 128\n");
+    fprintf(out, "  %s 0, 0, 0, %d\n",
+      constant,
+      (int)(iter->second.type == TYPE_BYTE ?
+            statbuf.st_size : statbuf.st_size / get_int_size()));
+
+    fprintf(out, "_%s:\n", iter->second.name.c_str());
+    fprintf(out, ".binfile \"%s\"\n\n", iter->first.c_str());
+  }
+
+  return 0;
+}
 

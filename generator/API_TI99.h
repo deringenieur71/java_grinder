@@ -3,14 +3,14 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _API_TI99_H
-#define _API_TI99_H
+#ifndef JAVA_GRINDER_GENERATOR_API_TI99_H
+#define JAVA_GRINDER_GENERATOR_API_TI99_H
 
 class API_TI99
 {

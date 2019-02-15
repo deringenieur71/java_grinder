@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * W65816 written by Joe Davisson
  *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "W65816.h"
+#include "generator/W65816.h"
 
 #define PUSH() \
   fprintf(out, "; PUSH\n"); \
@@ -153,10 +153,10 @@ int W65816::start_init()
   return 0;
 }
 
-int W65816::insert_static_field_define(const char *name, const char *type, int index)
+int W65816::insert_static_field_define(std::string &name, std::string &type, int index)
 {
   fprintf(out, "; insert_static_field_define\n");
-  fprintf(out, "  %s equ ram_start + %d\n", name, (index + 1) * 2);
+  fprintf(out, "  %s equ ram_start + %d\n", name.c_str(), (index + 1) * 2);
 
   return 0;
 }
@@ -170,33 +170,33 @@ int W65816::init_heap(int field_count)
   return 0;
 }
 
-int W65816::field_init_int(char *name, int index, int value)
+int W65816::field_init_int(std::string &name, int index, int value)
 {
   if (value < -32768 || value > 65535) { return -1; }
 
   fprintf(out, "; field_init_short\n");
   fprintf(out, "  lda #%d\n", (uint16_t)value);
-  fprintf(out, "  sta %s\n", name);
+  fprintf(out, "  sta %s\n", name.c_str());
 
   return 0;
 }
 
-int W65816::field_init_ref(char *name, int index)
+int W65816::field_init_ref(std::string &name, int index)
 {
   fprintf(out, "; field_init_ref\n");
-  fprintf(out, "  lda #_%s\n", name);
-  fprintf(out, "  sta %s\n", name);
+  fprintf(out, "  lda #_%s\n", name.c_str());
+  fprintf(out, "  sta %s\n", name.c_str());
 
   return 0;
 }
 
-void W65816::method_start(int local_count, int max_stack, int param_count, const char *name)
+void W65816::method_start(int local_count, int max_stack, int param_count, std::string &name)
 {
   stack = 0;
 
-  is_main = (strcmp(name, "main") == 0) ? 1 : 0;
+  is_main = (name == "main") ? 1 : 0;
 
-  fprintf(out, "%s:\n", name);
+  fprintf(out, "%s:\n", name.c_str());
 
   // main() function goes here
   if (!is_main)
@@ -233,10 +233,10 @@ int W65816::push_local_var_ref(int index)
   return push_local_var_int(index);
 }
 
-int W65816::push_ref_static(const char *name, int index)
+int W65816::push_ref_static(std::string &name, int index)
 {
   fprintf(out, "; push_ref_static\n");
-  fprintf(out, "  lda #_%s\n", name);
+  fprintf(out, "  lda #_%s\n", name.c_str());
   PUSH();
   stack++;
 
@@ -276,22 +276,22 @@ int W65816::push_long(int64_t n)
   return push_int((int32_t)n);
 }
 
+#if 0
 int W65816::push_float(float f)
 {
-  printf("Float is not supported right now.\n");
   return -1;
 }
 
 int W65816::push_double(double f)
 {
-  printf("Double is not supported right now.\n");
   return -1;
 }
+#endif
 
-int W65816::push_ref(char *name)
+int W65816::push_ref(std::string &name)
 {
   fprintf(out, "; push_ref\n");
-  fprintf(out, "  lda %s\n", name);
+  fprintf(out, "  lda %s\n", name.c_str());
   PUSH();
   stack++;
 
@@ -590,7 +590,7 @@ int W65816::integer_to_short()
   return 0;
 }
 
-int W65816::jump_cond(const char *label, int cond, int distance)
+int W65816::jump_cond(std::string &label, int cond, int distance)
 {
   bool reverse = false;
 
@@ -617,13 +617,13 @@ int W65816::jump_cond(const char *label, int cond, int distance)
         fprintf(out, "  lda stack,x\n");
         fprintf(out, "  cmp #0\n");
         fprintf(out, "  bne label_%d\n", label_count);
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_NOT_EQUAL:
         fprintf(out, "  lda stack,x\n");
         fprintf(out, "  cmp #0\n");
         fprintf(out, "  beq label_%d\n", label_count);
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_LESS:
         if(reverse == false)
@@ -631,14 +631,14 @@ int W65816::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  lda stack,x\n");
           fprintf(out, "  cmp #0\n");
           fprintf(out, "  bpl label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
           fprintf(out, "  lda #0\n");
           fprintf(out, "  cmp stack,x\n");
           fprintf(out, "  bpl label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
       case COND_GREATER_EQUAL:
@@ -647,14 +647,14 @@ int W65816::jump_cond(const char *label, int cond, int distance)
           fprintf(out, "  lda stack,x\n");
           fprintf(out, "  cmp #0\n");
           fprintf(out, "  bmi lalbe_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
           fprintf(out, "  lda #0\n");
           fprintf(out, "  cmp stack,x\n");
           fprintf(out, "  bmi label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
     }
@@ -668,7 +668,7 @@ int W65816::jump_cond(const char *label, int cond, int distance)
   return 0;
 }
 
-int W65816::jump_cond_integer(const char *label, int cond, int distance)
+int W65816::jump_cond_integer(std::string &label, int cond, int distance)
 {
   bool reverse = false;
 
@@ -698,13 +698,13 @@ int W65816::jump_cond_integer(const char *label, int cond, int distance)
         fprintf(out, "  lda stack - 0,x\n");
         fprintf(out, "  cmp stack - 2,x\n");
         fprintf(out, "  bne label_%d\n", label_count);
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_NOT_EQUAL:
         fprintf(out, "  lda stack - 0,x\n");
         fprintf(out, "  cmp stack - 2,x\n");
         fprintf(out, "  beq label_%d\n", label_count);
-        fprintf(out, "  jmp %s\n", label);
+        fprintf(out, "  jmp %s\n", label.c_str());
         break;
       case COND_LESS:
         if(reverse == false)
@@ -712,14 +712,14 @@ int W65816::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  lda stack - 0,x\n");
           fprintf(out, "  cmp stack - 2,x\n");
           fprintf(out, "  bpl label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
           fprintf(out, "  lda stack - 2,x\n");
           fprintf(out, "  cmp stack - 0,x\n");
           fprintf(out, "  bpl label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
       case COND_GREATER_EQUAL:
@@ -728,14 +728,14 @@ int W65816::jump_cond_integer(const char *label, int cond, int distance)
           fprintf(out, "  lda stack - 0,x\n");
           fprintf(out, "  cmp stack - 2,x\n");
           fprintf(out, "  bmi label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
           else
         {
           fprintf(out, "  lda stack - 2,x\n");
           fprintf(out, "  cmp stack - 0,x\n");
           fprintf(out, "  bmi label_%d\n", label_count);
-          fprintf(out, "  jmp %s\n", label);
+          fprintf(out, "  jmp %s\n", label.c_str());
         }
         break;
     }
@@ -820,26 +820,26 @@ int W65816::return_void(int local_count)
   return 0;
 }
 
-int W65816::jump(const char *name, int distance)
+int W65816::jump(std::string &name, int distance)
 {
-  fprintf(out, "  jmp %s\n", name);
+  fprintf(out, "  jmp %s\n", name.c_str());
 
   return 0;
 }
 
-int W65816::call(const char *name)
+int W65816::call(std::string &name)
 {
-  fprintf(out, "  jsr %s\n", name);
+  fprintf(out, "  jsr %s\n", name.c_str());
 
   return 0;
 }
 
 int W65816::invoke_static_method(const char *name, int params, int is_void)
 {
-int local;
-int stack_vars = stack;
+  int local;
+  int stack_vars = stack;
 
-  printf("invoke_static_method() name=%s params=%d is_void=%d\n", name, params, is_void);
+  //printf("invoke_static_method() name=%s params=%d is_void=%d\n", name, params, is_void);
 
   fprintf(out, "; invoke_static_method\n");
 
@@ -879,18 +879,18 @@ int stack_vars = stack;
   return 0;
 }
 
-int W65816::put_static(const char *name, int index)
+int W65816::put_static(std::string &name, int index)
 {
-  fprintf(out, "  lda %s\n", name);
+  fprintf(out, "  lda %s\n", name.c_str());
   PUSH();
   stack++;
 
   return 0;
 }
 
-int W65816::get_static(const char *name, int index)
+int W65816::get_static(std::string &name, int index)
 {
-  fprintf(out, "  lda %s\n", name);
+  fprintf(out, "  lda %s\n", name.c_str());
   PUSH();
   stack++;
 
@@ -921,7 +921,7 @@ int W65816::new_array(uint8_t type)
   return 0;
 }
 
-int W65816::insert_array(const char *name, int32_t *data, int len, uint8_t type)
+int W65816::insert_array(std::string &name, int32_t *data, int len, uint8_t type)
 {
   if (type == TYPE_BYTE)
   {
@@ -941,7 +941,7 @@ int W65816::insert_array(const char *name, int32_t *data, int len, uint8_t type)
   return 0;
 }
 
-int W65816::insert_string(const char *name, uint8_t *bytes, int len)
+int W65816::insert_string(std::string &name, uint8_t *bytes, int len)
 {
   fprintf(out, "dw %d\n", len);
   return insert_utf8(name, bytes, len);
@@ -958,10 +958,10 @@ int W65816::push_array_length()
   return 0;
 }
 
-int W65816::push_array_length(const char *name, int field_id)
+int W65816::push_array_length(std::string &name, int field_id)
 {
   need_push_array_length2 = 1;
-  fprintf(out, "  lda %s\n", name);
+  fprintf(out, "  lda %s\n", name.c_str());
   fprintf(out, "  jsr push_array_length2\n");
   stack++;
 
@@ -993,12 +993,12 @@ int W65816::array_read_int()
   return 0;
 }
 
-int W65816::array_read_byte(const char *name, int field_id)
+int W65816::array_read_byte(std::string &name, int field_id)
 {
   if(stack > 0)
   {
     need_array_byte_support = 1;
-    fprintf(out, "  lda %s\n", name);
+    fprintf(out, "  lda %s\n", name.c_str());
     fprintf(out, "  sta address\n");
     fprintf(out, "  jsr array_read_byte2\n");
   }
@@ -1006,17 +1006,17 @@ int W65816::array_read_byte(const char *name, int field_id)
   return 0;
 }
 
-int W65816::array_read_short(const char *name, int field_id)
+int W65816::array_read_short(std::string &name, int field_id)
 {
   return array_read_int(name, field_id);
 }
 
-int W65816::array_read_int(const char *name, int field_id)
+int W65816::array_read_int(std::string &name, int field_id)
 {
   if(stack > 0)
   {
     need_array_int_support = 1;
-    fprintf(out, "  lda %s\n", name);
+    fprintf(out, "  lda %s\n", name.c_str());
     fprintf(out, "  sta address\n");
     fprintf(out, "  jsr array_read_int2\n");
   }
@@ -1047,14 +1047,14 @@ int W65816::array_write_int()
   return 0;
 }
 
-int W65816::array_write_byte(const char *name, int field_id)
+int W65816::array_write_byte(std::string &name, int field_id)
 {
   need_array_byte_support = 1;
   get_values_from_stack(2);
   fprintf(out, "; array_write_byte2\n");
   fprintf(out, "  clc\n");
   fprintf(out, "  lda value2\n");
-  fprintf(out, "  adc %s\n", name);
+  fprintf(out, "  adc %s\n", name.c_str());
   fprintf(out, "  sta address\n");
   fprintf(out, "  lda value1\n");
   fprintf(out, "  sep #0x20\n");
@@ -1064,19 +1064,19 @@ int W65816::array_write_byte(const char *name, int field_id)
   return 0;
 }
 
-int W65816::array_write_short(const char *name, int field_id)
+int W65816::array_write_short(std::string &name, int field_id)
 {
   return array_write_int(name, field_id);
 }
 
-int W65816::array_write_int(const char *name, int field_id)
+int W65816::array_write_int(std::string &name, int field_id)
 {
   need_array_int_support = 1;
   get_values_from_stack(2);
   fprintf(out, "; array_write_int2\n");
   fprintf(out, "  clc\n");
   fprintf(out, "  lda value2\n");
-  fprintf(out, "  adc %s\n", name);
+  fprintf(out, "  adc %s\n", name.c_str());
   fprintf(out, "  sta address\n");
   fprintf(out, "  lda value1\n");
   fprintf(out, "  sta (address)\n");

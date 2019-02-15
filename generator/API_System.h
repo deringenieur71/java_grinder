@@ -3,14 +3,14 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _API_SYSTEM_H
-#define _API_SYSTEM_H
+#ifndef JAVA_GRINDER_GENERATOR_API_SYSTEM_H
+#define JAVA_GRINDER_GENERATOR_API_SYSTEM_H
 
 class API_System
 {
@@ -25,9 +25,12 @@ public:
   virtual int memory_allocStackBytes_I() { return -1; }
   virtual int memory_allocStackShorts_I() { return -1; }
   virtual int memory_allocStackInts_I() { return -1; }
+  virtual int memory_preloadByteArray_X(const char *array_name) { return -1; }
+  virtual int memory_preloadIntArray_X(const char *array_name) { return -1; }
 
   // CPU functions
   virtual int cpu_setClock16() { return -1; }
+  virtual int cpu_setClock8() { return -1; }
   virtual int cpu_setClock25() { return -1; }
   virtual int cpu_setClockExternal2() { return -1; }
   virtual int cpu_nop() { return -1; }

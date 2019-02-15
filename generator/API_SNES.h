@@ -3,16 +3,16 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * SNES by Joe Davisson
  *
  */
 
-#ifndef _API_SNES_H
-#define _API_SNES_H
+#ifndef JAVA_GRINDER_GENERATOR_API_SNES_H
+#define JAVA_GRINDER_GENERATOR_API_SNES_H
 
 class API_SNES
 {

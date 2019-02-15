@@ -3,14 +3,14 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _API_DSP_H
-#define _API_DSP_H
+#ifndef JAVA_GRINDER_GENERATOR_API_DSP_H
+#define JAVA_GRINDER_GENERATOR_API_DSP_H
 
 class API_DSP
 {

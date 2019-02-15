@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "sega_genesis.h"
+#include "api/sega_genesis.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -35,7 +34,7 @@
     return generator->sega_genesis_##funct##sig(const_val1, const_val2); \
   }
 
-int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name)
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *method_name)
 {
   CHECK_FUNC(setPalettePointer,_I)
   CHECK_FUNC(setPaletteColor,_I)
@@ -79,7 +78,7 @@ int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name)
   return -1;
 }
 
-int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name, int const_val)
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *method_name, int const_val)
 {
   CHECK_FUNC_CONST(setPalettePointer,_I)
   CHECK_FUNC_CONST(setPaletteColor,_I)
@@ -89,7 +88,7 @@ int sega_genesis(JavaClass *java_class, Generator *generator, char *method_name,
   return -1;
 }
 
-int sega_genesis(JavaClass *java_class, Generator *generator, char *function, int const_val1, int const_val2)
+int sega_genesis(JavaClass *java_class, Generator *generator, const char *function, int const_val1, int const_val2)
 {
   CHECK_FUNC_CONST_2(setCursor,_II)
 

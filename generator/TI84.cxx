@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "TI84.h"
-#include "Z80.h"
+#include "generator/TI84.h"
+#include "generator/Z80.h"
 
 #define BCALL(a) \
   save_registers(); \

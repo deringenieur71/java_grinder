@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -13,118 +13,132 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <algorithm>
 
-#include "JavaClass.h"
-#include "JavaCompiler.h"
-#include "invoke.h"
-#include "invoke_static.h"
-#include "adc.h"
-#include "appleiigs_.h"
-#include "atari_2600.h"
-#include "c64_sid.h"
-#include "c64_vic.h"
-#include "cpc_.h"
-#include "cpu.h"
-#include "dsp.h"
-#include "ioport.h"
-#include "memory.h"
-#include "msx_.h"
-#include "parallella.h"
-#include "playstation_2.h"
-#include "propeller_.h"
-#include "sega_genesis.h"
-#include "spi.h"
-#include "snes_.h"
-#include "sxb.h"
-#include "ti84_.h"
-#include "ti99_.h"
-#include "timer.h"
-#include "trs80_coco.h"
-#include "uart.h"
-#include "watchdog.h"
+#include "api/invoke.h"
+#include "api/invoke_static.h"
+#include "api/adc.h"
+#include "api/amiga.h"
+#include "api/appleiigs.h"
+#include "api/atari_2600.h"
+#include "api/c64_sid.h"
+#include "api/c64_vic.h"
+#include "api/cpc.h"
+#include "api/cpu.h"
+#include "api/dsp.h"
+#include "api/ioport.h"
+#include "api/math.h"
+#include "api/memory.h"
+#include "api/msx.h"
+#include "api/parallella.h"
+#include "api/playstation_2.h"
+#include "api/propeller.h"
+#include "api/sega_genesis.h"
+#include "api/spi.h"
+#include "api/snes.h"
+#include "api/sxb.h"
+#include "api/ti84.h"
+#include "api/ti99.h"
+#include "api/timer.h"
+#include "api/trs80_coco.h"
+#include "api/uart.h"
+#include "api/watchdog.h"
+#include "common/JavaClass.h"
+#include "common/JavaCompiler.h"
 
 #define CHECK_WITH_PORT(a,b,c) \
     if (strcmp(cls, #a#c) == 0) \
     { \
-      ret = b(java_class, generator, function, c); \
+      ret = b(java_class, generator, function.c_str(), c); \
     }
 
 #define CHECK(a,b) \
     if (strcmp(cls, #a) == 0) \
     { \
-      ret = b(java_class, generator, function); \
+      ret = b(java_class, generator, function.c_str()); \
     }
 
 #define CHECK_WITH_PORT_CONST(a,b,c) \
     if (strcmp(cls, #a#c) == 0) \
     { \
-      ret = b(java_class, generator, function, c, const_vals[0]); \
+      ret = b(java_class, generator, function.c_str(), c, const_vals[0]); \
     }
 
 #define CHECK_CONST(a,b) \
     if (strcmp(cls, #a) == 0) \
     { \
-      ret = b(java_class, generator, function, const_vals[0]); \
+      ret = b(java_class, generator, function.c_str(), const_vals[0]); \
     }
 
 #define CHECK_WITH_PORT_CONST_2(a,b,c) \
     if (strcmp(cls, #a#c) == 0) \
     { \
-      ret = b(java_class, generator, function, c, const_vals[0], const_vals[1]); \
+      ret = b(java_class, generator, function.c_str(), c, const_vals[0], const_vals[1]); \
     }
 
 #define CHECK_CONST_2(a,b) \
     if (strcmp(cls, #a) == 0) \
     { \
-      ret = b(java_class, generator, function, const_vals[0], const_vals[1]); \
+      ret = b(java_class, generator, function.c_str(), const_vals[0], const_vals[1]); \
     }
 
-static void remove_illegal_chars(char *function)
+static void remove_illegal_chars(std::string &function)
 {
-  while(*function != 0)
-  {
-    if (*function == '/' || *function == ';') { *function = '_'; }
-    function++;
-  }
+  std::replace(function.begin(), function.end(), '/', '_');
+  std::replace(function.begin(), function.end(), ';', '_');
 }
 
 int invoke_static(JavaClass *java_class, int method_id, Generator *generator)
 {
-  char method_name[128];
-  char method_sig[128];
-  char method_class[128];
-  char function[256];
+  std::string method_name;
+  std::string method_sig;
+  std::string method_class;
+  std::string function;
 
   //printf("invoke_static()\n");
 
-  if (java_class->get_class_name(method_class, sizeof(method_class), method_id) != 0 ||
-      java_class->get_ref_name_type(method_name, method_sig, sizeof(method_name), method_id) != 0)
+  if (java_class->get_class_name(method_class, method_id) != 0 ||
+      java_class->get_ref_name_type(method_name, method_sig, method_id) != 0)
   {
     printf("Error: Couldn't get name and type for method_id %d\n", method_id);
     return -1;
   }
 
-  //printf("method: '%s as %s' from %s\n", method_name, method_sig, method_class);
+  //printf("method: [%d] '%s' as %s' from %s\n",
+  //  method_id, method_name.c_str(), method_sig.c_str(), method_class.c_str());
 
-  get_static_function(function, method_name, method_sig);
+  function = get_static_function(method_name, method_sig);
 
-  //printf("function: %s()\n", function);
+  //printf("function: %s()\n", function.c_str());
   int ret = -1;
 
-  size_t len = sizeof("net/mikekohn/java_grinder/") - 1;
-  size_t len_c64 = sizeof("net/mikekohn/java_grinder/C64/") - 1;
+  #define PACKAGE_C64 "net/mikekohn/java_grinder/c64/"
+  #define PACKAGE_AMIGA "net/mikekohn/java_grinder/amiga/"
 
-  if (strncmp("net/mikekohn/java_grinder/C64/", method_class, len_c64) == 0)
+  const size_t len = sizeof("net/mikekohn/java_grinder/") - 1;
+  const size_t len_c64 = sizeof(PACKAGE_C64) - 1;
+  const size_t len_amiga = sizeof(PACKAGE_AMIGA) - 1;
+
+  if (strncmp(PACKAGE_C64, method_class.c_str(), len_c64) == 0)
   {
-    char *cls = method_class + len_c64;
+    const char *cls = method_class.c_str() + len_c64;
 
     CHECK(SID, c64_sid);
     CHECK(VIC, c64_vic);
   }
     else
-  if (strncmp("net/mikekohn/java_grinder/", method_class, len) == 0)
+  if (strncmp(PACKAGE_AMIGA, method_class.c_str(), len_amiga) == 0)
   {
-    char *cls = method_class + len;
+    const char *cls = method_class.c_str() + len_amiga;
+
+    CHECK(Amiga, amiga);
+    //CHECK(Copper, amiga_copper);
+    //CHECK(Blitter, amiga_blitter);
+  }
+    else
+  if (strncmp("net/mikekohn/java_grinder/", method_class.c_str(), len) == 0)
+  {
+    const char *cls = method_class.c_str() + len;
 
     CHECK(CPU, cpu)
     CHECK_WITH_PORT(IOPort, ioport, 0)
@@ -146,6 +160,7 @@ int invoke_static(JavaClass *java_class, int method_id, Generator *generator)
     CHECK_WITH_PORT(SPI, spi, 1)
     CHECK_WITH_PORT(UART, uart, 0)
     CHECK_WITH_PORT(UART, uart, 1)
+    CHECK(Math, math)
     CHECK(MSX, msx)
     CHECK(Parallella, parallella)
     CHECK(Playstation2, playstation2)
@@ -165,51 +180,62 @@ int invoke_static(JavaClass *java_class, int method_id, Generator *generator)
     // FIXME: This probably is not good, although the assembler will catch it.
     //if (strcmp(method_class, java_class->class_name) == 0)
     {
-      int params,is_void;
+      int params, is_void;
+
       get_signature(method_sig, &params, &is_void);
+
       remove_illegal_chars(function);
-      ret = generator->invoke_static_method(function, params, is_void);
+
+      ret = generator->invoke_static_method(function.c_str(), params, is_void);
     }
   }
 
   if (ret == 0) { return 0; }
 
-  printf("--> Function not implemented '%s' %s:%d\n", function, __FILE__, __LINE__);
+  printf("--> Function not implemented '%s' %s:%d\n",
+    function.c_str(), __FILE__, __LINE__);
 
   return -1;
 }
 
-int invoke_static(JavaClass *java_class, int method_id, Generator *generator, int *const_vals, int const_count)
+int invoke_static(
+  JavaClass *java_class,
+  int method_id,
+  Generator *generator,
+  int *const_vals,
+  int const_count)
 {
-  char method_name[128];
-  char method_sig[128];
-  char method_class[128];
-  char function[256];
+  std::string method_name;
+  std::string method_sig;
+  std::string method_class;
+  std::string function;
 
   //printf("const invoke_static() const_count=%d\n", const_count);
 
-  if (java_class->get_class_name(method_class, sizeof(method_class), method_id) != 0 ||
-      java_class->get_ref_name_type(method_name, method_sig, sizeof(method_name), method_id) != 0)
+  if (java_class->get_class_name(method_class, method_id) != 0 ||
+      java_class->get_ref_name_type(method_name, method_sig, method_id) != 0)
   {
     printf("Error: Couldn't get name and type for method_id %d\n", method_id);
     return -1;
   }
 
-  //printf("const method: '%s as %s' from %s\n  const_count=%d\n", method_name, method_sig, method_class, const_count);
+  //printf("const method: '%s as %s' from %s\n  const_count=%d\n",
+  //  method_name.c_str(), method_sig.c_str(), method_class.c_str(),
+  //  const_count);
 
-  get_static_function(function, method_name, method_sig);
+  function = get_static_function(method_name, method_sig);
 
-  //printf("const function: %s()\n", function);
+  //printf("const function: %s()\n", function.c_str());
   int ret = -1;
 
-  size_t len = sizeof("net/mikekohn/java_grinder/") - 1;
+  const size_t len = sizeof("net/mikekohn/java_grinder/") - 1;
 
-  if (strncmp("net/mikekohn/java_grinder/", method_class, len)!=0)
+  if (strncmp("net/mikekohn/java_grinder/", method_class.c_str(), len)!=0)
   {
     return -1;
   }
 
-  char *cls = method_class + len;
+  const char *cls = method_class.c_str() + len;
 
   if (const_count == 1)
   {
@@ -269,4 +295,75 @@ int invoke_static(JavaClass *java_class, int method_id, Generator *generator, in
   return -1;
 }
 
+int invoke_static(JavaClass *java_class, int method_id, Generator *generator, const char *const_val)
+{
+  std::string method_name;
+  std::string method_sig;
+  std::string method_class;
+  std::string function;
+
+  if (java_class->get_class_name(method_class, method_id) != 0 ||
+      java_class->get_ref_name_type(method_name, method_sig, method_id) != 0)
+  {
+    printf("Error: Couldn't get name and type for method_id %d\n", method_id);
+    return -1;
+  }
+
+  function = get_static_function(method_name, method_sig);
+
+  //printf("const function: %s()\n", function.c_str());
+  int ret = -1;
+
+  const size_t len = sizeof("net/mikekohn/java_grinder/") - 1;
+
+  if (strncmp("net/mikekohn/java_grinder/", method_class.c_str(), len)!=0)
+  {
+    return -1;
+  }
+
+  if (strncmp("net/mikekohn/java_grinder/", method_class.c_str(), len) == 0)
+  {
+    const char *cls = method_class.c_str() + len;
+
+    if (strcmp(cls, "Memory") == 0)
+    {
+      if (function == "preloadByteArray_X" ||
+          function == "preloadIntArray_X")
+      {
+        char array_name[strlen(const_val) + 1];
+        int ptr = 0;
+        int type = TYPE_BYTE;
+
+        if (function == "preloadIntArray_X") { type = TYPE_INT; }
+
+        while(const_val[ptr] != 0)
+        {
+          if (const_val[ptr] == '.' ||
+              const_val[ptr] == '/' ||
+              const_val[ptr] == ' ' ||
+              const_val[ptr] == '\\')
+          {
+            array_name[ptr] = '_';
+          }
+          else
+          {
+            array_name[ptr] = const_val[ptr];
+          }
+
+          ptr++;
+        }
+
+        array_name[ptr] = 0;
+
+        generator->use_array_file(const_val, array_name, type);
+
+        return memory(java_class, generator, function.c_str(), array_name);
+      }
+    }
+  }
+
+  if (ret == 0) { return 0; }
+
+  return -1;
+}
 

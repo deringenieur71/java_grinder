@@ -5,20 +5,20 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * Western Design Center SXB board by Joe Davisson.
  *
  */
 
-#ifndef _SXB_H
-#define _SXB_H
+#ifndef JAVA_GRINDER_API_SXB_H
+#define JAVA_GRINDER_API_SXB_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include "common/JavaClass.h"
+#include "generator/Generator.h"
 
-int sxb(JavaClass *java_class, Generator *generator, char *method_name);
-int sxb(JavaClass *java_class, Generator *generator, char *method_name, int const_val);
+int sxb(JavaClass *java_class, Generator *generator, const char *method_name);
+int sxb(JavaClass *java_class, Generator *generator, const char *method_name, int const_val);
 
 #endif
 

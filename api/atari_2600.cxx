@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2015 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,8 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "atari_2600.h"
+#include "api/atari_2600.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -35,7 +34,7 @@
     return generator->atari2600_##funct##sig(const_val1, const_val2); \
   }
 
-int atari_2600(JavaClass *java_class, Generator *generator, char *method_name)
+int atari_2600(JavaClass *java_class, Generator *generator, const char *method_name)
 {
   CHECK_FUNC(waitHsync,_I)
   CHECK_FUNC(waitHsync,)
@@ -149,7 +148,7 @@ int atari_2600(JavaClass *java_class, Generator *generator, char *method_name)
   return -1;
 }
 
-int atari_2600(JavaClass *java_class, Generator *generator, char *method_name, int const_val)
+int atari_2600(JavaClass *java_class, Generator *generator, const char *method_name, int const_val)
 {
   CHECK_FUNC_CONST(waitHsync,_I)
 
@@ -175,7 +174,7 @@ int atari_2600(JavaClass *java_class, Generator *generator, char *method_name, i
   return -1;
 }
 
-int atari_2600(JavaClass *java_class, Generator *generator, char *function, int const_val1, int const_val2)
+int atari_2600(JavaClass *java_class, Generator *generator, const char *function, int const_val1, int const_val2)
 {
   //CHECK_FUNC_CONST_2(someFunction,_II)
 

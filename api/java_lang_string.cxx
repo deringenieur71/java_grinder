@@ -3,9 +3,9 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
@@ -14,9 +14,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "JavaCompiler.h"
-#include "java_lang_string.h"
+#include "api/java_lang_string.h"
 
 // FIXME: This should be changed to just the "pushed" versions
 
@@ -44,7 +42,7 @@ static int string_charAt_I(JavaClass *java_class, Generator *generator)
   return 0;
 }
 
-int java_lang_string(JavaClass *java_class, Generator *generator, char *function, char *field_name, int field_id)
+int java_lang_string(JavaClass *java_class, Generator *generator, const char *function, const char *field_name, int field_id)
 {
   CHECK_FUNC(length)
   CHECK_FUNC(charAt_I)
@@ -52,7 +50,7 @@ int java_lang_string(JavaClass *java_class, Generator *generator, char *function
   return -1;
 }
 
-int java_lang_string(JavaClass *java_class, Generator *generator, char *method_name)
+int java_lang_string(JavaClass *java_class, Generator *generator, const char *method_name)
 {
   CHECK_FUNC_PUSHED(length,,push_array_length)
   CHECK_FUNC_PUSHED(charAt,_I,array_read_byte)

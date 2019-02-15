@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  * Western Design Center SXB board by Joe Davisson.
  *
@@ -16,8 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "JavaClass.h"
-#include "sxb.h"
+#include "api/sxb.h"
 
 #define CHECK_FUNC(funct,sig) \
   if (strcmp(#funct#sig, method_name) == 0) \
@@ -31,7 +30,7 @@
     return generator->sxb_##funct##sig(const_val); \
   }
 
-int sxb(JavaClass *java_class, Generator *generator, char *method_name)
+int sxb(JavaClass *java_class, Generator *generator, const char *method_name)
 {
   CHECK_FUNC(getChar,)
   CHECK_FUNC(putChar,_C)
@@ -44,7 +43,7 @@ int sxb(JavaClass *java_class, Generator *generator, char *method_name)
   return -1;
 }
 
-int sxb(JavaClass *java_class, Generator *generator, char *method_name, int const_val)
+int sxb(JavaClass *java_class, Generator *generator, const char *method_name, int const_val)
 {
   return -1;
 }

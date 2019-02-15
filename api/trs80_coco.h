@@ -3,21 +3,21 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2016 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _TRS80_COCO_H
-#define _TRS80_COCO_H
+#ifndef JAVA_GRINDER_API_TRS80_COCO_H
+#define JAVA_GRINDER_API_TRS80_COCO_H
 
-#include "Generator.h"
-#include "JavaClass.h"
+#include "common/JavaClass.h"
+#include "generator/Generator.h"
 
-int trs80_coco(JavaClass *java_class, Generator *generator, char *method_name);
-int trs80_coco(JavaClass *java_class, Generator *generator, char *method_name, int const_val);
-int trs80_coco(JavaClass *java_class, Generator *generator, char *method_name, int const_val1, int const_val2);
+int trs80_coco(JavaClass *java_class, Generator *generator, const char *method_name);
+int trs80_coco(JavaClass *java_class, Generator *generator, const char *method_name, int const_val);
+int trs80_coco(JavaClass *java_class, Generator *generator, const char *method_name, int const_val1, int const_val2);
 
 #endif
 

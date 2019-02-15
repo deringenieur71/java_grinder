@@ -3,17 +3,18 @@
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
  *     Web: http://www.mikekohn.net/
- * License: GPL
+ * License: GPLv3
  *
- * Copyright 2014-2017 by Michael Kohn
+ * Copyright 2014-2018 by Michael Kohn
  *
  */
 
-#ifndef _JAVA_CLASS_H
-#define _JAVA_CLASS_H
+#ifndef JAVA_GRINDER_COMMON_JAVA_CLASS_H
+#define JAVA_GRINDER_COMMON_JAVA_CLASS_H
 
 #include <stdint.h>
 #include <map>
+#include <string>
 
 // http://java.sun.com/docs/books/jvms/second_edition/html/ClassFile.doc.html
 // http://www.brics.dk/~mis/dOvs/jvmspec/ref-Java.html
@@ -57,6 +58,7 @@
 #define ARRAY_TYPE_SHORT 9
 #define ARRAY_TYPE_INT 10
 #define ARRAY_TYPE_LONG 11
+#define ARRAY_TYPE_OBJECT 100
 
 struct generic_twoint16_t
 {
@@ -179,32 +181,27 @@ public:
   JavaClass(FILE *in, bool is_main_class=true);
   ~JavaClass();
   void print();
-  int get_name_constant(char *name, int len, int index);
-  int get_method_name(char *name, int len, int index);
-  int get_field_name(char *name, int len, int index);
-  int get_field_type(char *name, int len, int index);
-  const fields_t *get_field(int index);
-  int get_ref_name_type(char *name, char *type, int len, int index);
-  bool is_ref_in_api(int index);
-  int get_class_name(char *name, int len, int index);
-  void *get_constant(int index);
-  struct methods_t *get_method(int index);
+  int get_name_constant(std::string &name, int index);
+  int get_method_name(std::string &name, int index);
+  int get_field_name(std::string &name, int index);
+  int get_field_type(std::string &type, int index);
+  int get_ref_name_type(std::string &name, std::string &type, int index);
+  int get_class_name(std::string &name, int index);
+
   int get_method_count() { return methods_count; }
   int get_field_count() { return fields_count; }
   int get_constant_count() { return constant_pool_count; }
-  int get_field_index(const char *field_name);
+
+  const fields_t *get_field(int index);
+  bool is_ref_in_api(int index);
+  void *get_constant(int index);
+  struct methods_t *get_method(int index);
+  int get_field_index(std::string &field_name);
   int get_clinit_method();
   static const char *tag_as_string(int tag);
   bool use_full_method_name() { return is_main_class == false; }
-
-  int32_t magic;
-  int16_t minor_version;
-  int16_t major_version;
-  int16_t access_flags;
-  int16_t this_class;
-  int16_t super_class;
-
-  char class_name[128];
+  const char *get_this_class_name() { return class_name.c_str(); }
+  uint16_t get_this_class() { return this_class; }
 
   // Keep track of constants that need to be defined.
   std::map<int,int> needed_constants;
@@ -229,6 +226,8 @@ private:
   uint16_t methods_count;
   uint16_t attributes_count;
 
+  std::string class_name;
+
   // Indexed pointers into the heaps.
   int *constant_pool;  // len = contant_pool_count - 1 (points in the heap)
   uint16_t *interfaces;
@@ -243,6 +242,13 @@ private:
   uint8_t *attributes_heap;
 
   bool is_main_class : 1;
+
+  int32_t magic;
+  int16_t minor_version;
+  int16_t major_version;
+  int16_t access_flags;
+  int16_t this_class;
+  int16_t super_class;
 };
 
 #endif
