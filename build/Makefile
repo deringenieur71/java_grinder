@@ -19,12 +19,14 @@ API= \
   api/dsp.o \
   api/draw3d_object.o \
   api/draw3d_texture.o \
+  api/intellivision.o \
   api/invoke.o \
   api/invoke_static.o \
   api/invoke_virtual.o \
   api/ioport.o \
   api/java_lang_system.o \
   api/java_lang_string.o \
+  api/joystick.o \
   api/math.o \
   api/memory.o \
   api/msx.o \
@@ -49,6 +51,7 @@ CPUS= \
   generator/DotNet.o \
   generator/DSPIC.o \
   generator/Epiphany.o \
+  generator/Intellivision.o \
   generator/M6502.o \
   generator/M6502_8.o \
   generator/MC68000.o \
@@ -59,10 +62,13 @@ CPUS= \
   generator/MSP430.o \
   generator/MSP430X.o \
   generator/Propeller.o \
+  generator/R4000.o \
   generator/R5900.o \
+  generator/SH4.o \
   generator/STDC.o \
   generator/TMS9900.o \
   generator/W65816.o \
+  generator/WebAssembly.o \
   generator/X86.o \
   generator/X86_64.o \
   generator/Z80.o
@@ -74,10 +80,12 @@ SYSTEMS= \
   generator/C64.o \
   generator/CPC.o \
   generator/MSX.o \
+  generator/Nintendo64.o \
   generator/Playstation2.o \
   generator/Playstation2VU0.o \
   generator/Playstation2VU1.o \
   generator/PIC32.o \
+  generator/SegaDreamcast.o \
   generator/SegaGenesis.o \
   generator/SNES.o \
   generator/TI84.o \

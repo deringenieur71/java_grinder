@@ -13,6 +13,7 @@ JAVA_SRC=\
   $(SRC_DIR)/CPC.java \
   $(SRC_DIR)/CPU.java \
   $(SRC_DIR)/DSP.java \
+  $(SRC_DIR)/Intellivision.java \
   $(SRC_DIR)/IOPort.java \
   $(SRC_DIR)/IOPort0.java \
   $(SRC_DIR)/IOPort1.java \
@@ -22,9 +23,11 @@ JAVA_SRC=\
   $(SRC_DIR)/IOPort5.java \
   $(SRC_DIR)/IOPort6.java \
   $(SRC_DIR)/IOPort7.java \
+  $(SRC_DIR)/Joystick.java \
   $(SRC_DIR)/Math.java \
   $(SRC_DIR)/Memory.java \
   $(SRC_DIR)/MSX.java \
+  $(SRC_DIR)/Nintendo64.java \
   $(SRC_DIR)/Parallella.java \
   $(SRC_DIR)/Playstation2.java \
   $(SRC_DIR)/Propeller.java \
@@ -60,7 +63,8 @@ JAVA_SRC=\
   $(SRC_DIR)/UART.java \
   $(SRC_DIR)/UART0.java \
   $(SRC_DIR)/UART1.java \
-  $(SRC_DIR)/Watchdog.java
+  $(SRC_DIR)/Watchdog.java \
+  $(SRC_DIR)/W65C265SXB.java
 
 default:
 	javac -classpath . -d ../build $(JAVA_SRC) 

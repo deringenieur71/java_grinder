@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2020 by Michael Kohn
  *
  */
 
@@ -21,6 +21,7 @@ public:
   virtual ~SegaGenesis();
 
   virtual int open(const char *filename);
+  virtual int finish();
   virtual int start_init();
 
   virtual int sega_genesis_setPalettePointer_I();

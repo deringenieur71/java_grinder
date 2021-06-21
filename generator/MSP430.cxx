@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -63,7 +63,7 @@ MSP430::MSP430(uint8_t chip_type) :
   need_mul_integers(0),
   need_div_integers(0),
   need_timer_interrupt(0),
-  is_main(0),
+  is_main(false),
   is_interrupt(0)
 {
   ram_start = 0x0200;
@@ -92,10 +92,6 @@ MSP430::MSP430(uint8_t chip_type) :
 
 MSP430::~MSP430()
 {
-  if (need_read_spi) { insert_read_spi(); }
-  if (need_mul_integers) { insert_mul_integers(); }
-  if (need_div_integers) { insert_div_integers(); }
-
   if (need_timer_interrupt)
   {
     fprintf(out, ".org 0x%04x\n", vector_timer);
@@ -119,6 +115,15 @@ int MSP430::open(const char *filename)
   // Set where RAM starts
   fprintf(out, "ram_start equ 0x%04x\n", ram_start);
   fprintf(out, "heap_ptr equ ram_start\n");
+
+  return 0;
+}
+
+int MSP430::finish()
+{
+  if (need_read_spi) { insert_read_spi(); }
+  if (need_mul_integers) { insert_mul_integers(); }
+  if (need_div_integers) { insert_div_integers(); }
 
   return 0;
 }
@@ -163,7 +168,11 @@ int MSP430::field_init_ref(std::string &name, int index)
   return 0;
 }
 
-void MSP430::method_start(int local_count, int max_stack, int param_count, std::string &name)
+void MSP430::method_start(
+  int local_count,
+  int max_stack,
+  int param_count,
+  std::string &name)
 {
   reg = 0;
   stack = 0;
@@ -171,8 +180,8 @@ void MSP430::method_start(int local_count, int max_stack, int param_count, std::
   this->max_stack = max_stack;
   //printf("max_stack=%d\n", max_stack);
 
-  is_main = (name == "main") ? 1 : 0;
-  is_interrupt = (name == "timerInterrupt") ? 1 : 0;
+  is_main = name == "main";
+  is_interrupt = name == "timerInterrupt";
 
   // main() function goes here
   fprintf(out, "%s:\n", name.c_str());
@@ -1764,8 +1773,10 @@ int MSP430::spi_init_II(int port)
   if (port != 0) { return -1; }
 
   char dst[16];
-  fprintf(out, "  ;; Set up SPI\n");
-  fprintf(out, "  mov.b #(USIPE7|USIPE6|USIPE5|USIMST|USIOE|USISWRST), &USICTL0\n");
+  fprintf(out, "  ;; spi_init_II(port=%d)\n", port);
+  fprintf(out, "  bis.b #0xe0, &P1SEL\n");
+  fprintf(out, "  bic.b #0xe0, &P1SEL2\n");
+  fprintf(out, "  mov.b #USIPE7|USIPE6|USIPE5|USIMST|USIOE|USISWRST, &USICTL0\n");
   pop_reg(dst);
   fprintf(out, "  mov.b %s, r14\n", dst);
   fprintf(out, "  rrc.b r14\n");
@@ -1799,8 +1810,11 @@ int MSP430::spi_init_II(int port)
 
 int MSP430::spi_init_II(int port, int clock_divisor, int mode)
 {
-  fprintf(out, "  ;; Set up SPI\n");
-  fprintf(out, "  mov.b #(USIPE7|USIPE6|USIPE5|USIMST|USIOE|USISWRST), &USICTL0\n");
+  fprintf(out, "  ;; spi_init_II(port=%d, divisor=%d, mode=%d)\n",
+    port, clock_divisor, mode);
+  fprintf(out, "  bis.b #0xe0, &P1SEL\n");
+  fprintf(out, "  bic.b #0xe0, &P1SEL2\n");
+  fprintf(out, "  mov.b #USIPE7|USIPE6|USIPE5|USIMST|USIOE|USISWRST, &USICTL0\n");
   fprintf(out, "  mov.b #%s, &USICTL1\n",
     (mode & 1) == 0 ? "0":"USICKPH");
   fprintf(out, "  mov.b #USIDIV_%d|USISSEL_2%s, &USICKCTL\n",
@@ -1831,6 +1845,13 @@ int MSP430::spi_send_I(int port)
   fprintf(out, "  ;; spi_send_I()\n");
   fprintf(out, "  mov.b %s, &USISRL\n", dst);
   fprintf(out, "  mov.b #8, &USICNT\n");
+  fprintf(out,
+    "spi_transfer_busy_%d:\n"
+    "  bit.b #USIIFG, &USICTL1\n"
+    "  jz spi_transfer_busy_%d\n",
+    label_count, label_count);
+
+  label_count++;
 
   return 0;
 }
@@ -1845,6 +1866,13 @@ int MSP430::spi_send16_I(int port)
   fprintf(out, "  ;; spi_send16_I()\n");
   fprintf(out, "  mov.w %s, &USISRL\n", dst);
   fprintf(out, "  mov.b #16, &USICNT\n");
+  fprintf(out,
+    "spi_transfer_busy_%d:\n"
+    "  bit.b #USIIFG, &USICTL1\n"
+    "  jz spi_transfer_busy_%d\n",
+    label_count, label_count);
+
+  label_count++;
 
   return 0;
 }
@@ -1936,12 +1964,14 @@ int MSP430::cpu_nop()
 // ADC
 int MSP430::adc_enable()
 {
+  fprintf(out, "  ;; adc_enable()\n");
   fprintf(out, "  mov.w #ADC10ON|ADC10SHT_3, &ADC10CTL0 ; ADC On\n");
   return 0;
 }
 
 int MSP430::adc_disable()
 {
+  fprintf(out, "  ;; adc_disable()\n");
   fprintf(out, "  mov.w #0, &ADC10CTL0 ; ADC Off\n");
   return 0;
 }

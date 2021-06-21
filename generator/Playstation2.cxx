@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -64,9 +64,31 @@ Playstation2::Playstation2() :
   ram_start = 0x00000000;
   ram_end = 32 * 1024 * 1024;
   physical_address = 0x0;
+  preload_array_align = 128;
 }
 
 Playstation2::~Playstation2()
+{
+}
+
+int Playstation2::open(const char *filename)
+{
+  if (R5900::open(filename) != 0) { return -1; }
+
+  fprintf(out,
+    ".include \"macros.inc\"\n"
+    ".include \"registers_gs_gp.inc\"\n"
+    ".include \"system_calls.inc\"\n"
+    ".include \"registers_ee.inc\"\n"
+    ".include \"registers_gs_priv.inc\"\n"
+    ".include \"vif.inc\"\n\n"
+    ".entry_point start\n"
+    ".export start\n\n");
+
+  return 0;
+}
+
+int Playstation2::finish()
 {
   add_dma_functions();
   add_misc_functions();
@@ -87,21 +109,6 @@ Playstation2::~Playstation2()
   add_strings();
   Math::add_sin_table(out);
   Math::add_cos_table(out);
-}
-
-int Playstation2::open(const char *filename)
-{
-  if (R5900::open(filename) != 0) { return -1; }
-
-  fprintf(out,
-    ".include \"macros.inc\"\n"
-    ".include \"registers_gs_gp.inc\"\n"
-    ".include \"system_calls.inc\"\n"
-    ".include \"registers_ee.inc\"\n"
-    ".include \"registers_gs_priv.inc\"\n"
-    ".include \"vif.inc\"\n\n"
-    ".entry_point start\n"
-    ".export start\n\n");
 
   return 0;
 }

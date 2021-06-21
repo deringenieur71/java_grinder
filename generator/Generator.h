@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -25,6 +25,8 @@
 #include "generator/API_CPC.h"
 #include "generator/API_DSP.h"
 #include "generator/API_Draw3D.h"
+#include "generator/API_Intellivision.h"
+#include "generator/API_Joystick.h"
 #include "generator/API_Math.h"
 #include "generator/API_Microcontroller.h"
 #include "generator/API_MSX.h"
@@ -47,6 +49,8 @@ class Generator :
   public API_CPC,
   public API_DSP,
   public API_Draw3D,
+  public API_Intellivision,
+  public API_Joystick,
   public API_Math,
   public API_Microcontroller,
   public API_MSX,
@@ -66,7 +70,8 @@ public:
   virtual ~Generator();
 
   virtual int open(const char *filename);
-  virtual int add_functions() { return 0; }
+  void close();
+  virtual int finish() { return 0; }
   virtual int get_cpu_byte_alignment() { return 2; }
   void label(std::string &name);
   virtual int start_init() = 0;
@@ -172,7 +177,6 @@ public:
   virtual int array_write_int(std::string &name, int field_id) = 0;
   virtual int array_write_float(std::string &name, int field_id);
   virtual int array_write_object(std::string &name, int field_id);
-  //virtual void close() = 0;
 
   // CPU
   virtual int cpu_asm_X(const char *code, int len);
@@ -182,7 +186,7 @@ public:
   void instruction_count_inc() { instruction_count++; }
 
   int use_array_file(const char *filename, const char *array, int type);
-  int add_array_files();
+  int ignore() { return 0; }
 
 protected:
   struct ArrayFiles
@@ -191,6 +195,7 @@ protected:
     int type;
   };
 
+  virtual int add_array_files();
   virtual int get_int_size() { return 4; }
   int insert_db(std::string &name, int32_t *data, int len, uint8_t len_type);
   int insert_dw(std::string &name, int32_t *data, int len, uint8_t len_type);
@@ -203,6 +208,7 @@ protected:
   FILE *out;
   int label_count;
   int instruction_count;
+  int preload_array_align;
   std::map<uint32_t, int> constants_pool;
   std::map<std::string, ArrayFiles> preload_arrays;
 };

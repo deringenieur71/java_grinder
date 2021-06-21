@@ -5,7 +5,7 @@
  *     Web: http://www.naken.cc/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -14,6 +14,9 @@ package net.mikekohn.java_grinder;
 public class Memory
 {
   private Memory() { }
+
+  /** Initialize a heap.  Currently only needed with Amiga. */
+  public static void initHeap(int size) { }
 
   /** Read a single byte from an address */
   public static byte read8(int address) { return 0; }
@@ -46,5 +49,26 @@ public class Memory
   /** Load a file from disk (at assembler time) and return a reference
       to it as an array of ints. */
   public static byte[] preloadByteArray(String filename) { return null; }
+
+  /** Clear an array of bytes. */
+  public static void clearArray(byte[] array) { }
+
+  /** Clear an array of short. */
+  public static void clearArray(short[] array) { }
+
+  /** Clear an array of int. */
+  public static void clearArray(int[] array) { }
+
+  /** Return the address of a byte[] as an int. */
+  public static int addressOf(byte[] array) { return 0; }
+
+  /** Return the address of a short[] as an int. */
+  public static int addressOf(short[] array) { return 0; }
+
+  /** Return the address of a char[] as an int. */
+  public static int addressOf(char[] array) { return 0; }
+
+  /** Return the address of a int[] as an int. */
+  public static int addressOf(int[] array) { return 0; }
 }
 

@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2020 by Michael Kohn
  *
  */
 
@@ -36,6 +36,7 @@
 
 int memory(JavaClass *java_class, Generator *generator, const char *function)
 {
+  CHECK_FUNC(initHeap,_I)
   CHECK_FUNC(read8,_I)
   CHECK_FUNC(write8,_IB)
   CHECK_FUNC(read16,_I)
@@ -43,6 +44,13 @@ int memory(JavaClass *java_class, Generator *generator, const char *function)
   CHECK_FUNC(allocStackBytes,_I)
   CHECK_FUNC(allocStackShorts,_I)
   CHECK_FUNC(allocStackInts,_I)
+  CHECK_FUNC(clearArray,_aB)
+  CHECK_FUNC(clearArray,_aS)
+  CHECK_FUNC(clearArray,_aI)
+  CHECK_FUNC(addressOf,_aB)
+  CHECK_FUNC(addressOf,_aS)
+  CHECK_FUNC(addressOf,_aC)
+  CHECK_FUNC(addressOf,_aI)
 
   return -1;
 }

@@ -72,7 +72,7 @@ MIPS32::MIPS32() :
   ram_end(0),
   virtual_address(0),
   physical_address(0),
-  is_main(0)
+  is_main(false)
 {
 
 }
@@ -181,9 +181,13 @@ int MIPS32::field_init_ref(std::string &name, int index)
   return 0;
 }
 
-void MIPS32::method_start(int local_count, int max_stack, int param_count, std::string &name)
+void MIPS32::method_start(
+  int local_count,
+  int max_stack,
+  int param_count,
+  std::string &name)
 {
-  is_main = (name == "main") ? 1 : 0;
+  is_main = name == "main";
 
   fprintf(out, "%s:\n", name.c_str());
   fprintf(out, "  ; %s(local_count=%d, max_stack=%d, param_count=%d)\n", name.c_str(), local_count, max_stack, param_count);
@@ -508,7 +512,29 @@ int MIPS32::sub_integer(int num)
 
 int MIPS32::mul_integer()
 {
-  return stack_alu("mul");
+  if (stack == 0)
+  {
+    fprintf(out, "  mult $t%d, $t%d\n", REG_STACK(reg-2), REG_STACK(reg-1));
+    fprintf(out, "  mflo $t%d\n", REG_STACK(reg-2));
+    reg--;
+  }
+    else
+  if (stack == 1)
+  {
+    STACK_POP(8);
+    fprintf(out, "  mult $t%d, $t8\n", REG_STACK(reg-1));
+    fprintf(out, "  mflo $t%d\n", REG_STACK(reg-1));
+  }
+    else
+  {
+    STACK_POP(8);
+    STACK_POP(9);
+    fprintf(out, "  mult $t9, $t8\n");
+    fprintf(out, "  mflo $t9\n");
+    STACK_PUSH(9);
+  }
+
+  return 0;
 }
 
 int MIPS32::div_integer()

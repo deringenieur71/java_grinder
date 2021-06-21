@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -29,6 +29,7 @@ public:
   virtual ~MSP430();
 
   virtual int open(const char *filename);
+  virtual int finish();
   virtual int start_init();
   virtual int insert_static_field_define(std::string &name, std::string &type, int index);
   virtual int init_heap(int field_count);
@@ -206,13 +207,13 @@ protected:
   int reg_max;
   int stack;
   int label_count;
-  char reg_string[8];
-  bool need_read_spi:1;
-  bool need_mul_integers:1;
-  bool need_div_integers:1;
-  bool need_timer_interrupt:1;
-  bool is_main:1;
-  bool is_interrupt:1;
+  char reg_string[16];
+  bool need_read_spi : 1;
+  bool need_mul_integers : 1;
+  bool need_div_integers : 1;
+  bool need_timer_interrupt : 1;
+  bool is_main : 1;
+  bool is_interrupt : 1;
   uint32_t ram_start;
   uint32_t stack_start;
   uint32_t flash_start;

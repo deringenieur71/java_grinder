@@ -1,39 +1,57 @@
 
+import net.mikekohn.java_grinder.Memory;
 import net.mikekohn.java_grinder.amiga.Amiga;
 import net.mikekohn.java_grinder.amiga.Blitter;
 import net.mikekohn.java_grinder.amiga.Copper;
 
 public class AmigaDemo
 {
-  static int[] sprite =
-  {
-    0x00000a0a,
-    0x00000a0a,
-    0x00000a0a,
-    0x00000a05,
-    0x00000a05,
-    0x00000a05,
-  };
-
   static public void main(String args[])
   {
+    Copper copper = new Copper(200);
+    Blitter blitter = new Blitter();
+
+    Display.init();
+
     Amiga.disableMultitasking();
-    Amiga.disableInterrupts();
+    //Amiga.disableInterrupts();
 
+    // Setup 320x200 display.
+    Amiga.setVideoMode(
+      //Amiga.VIDEO_MODE_HIRES |
+      Amiga.VIDEO_MODE_BITPLANE_COUNT_1 |
+      Amiga.VIDEO_MODE_COLOR);
 
-    while(true)
-    {
-      Amiga.setSpriteImage(0, sprite);
-      Amiga.setSpritePosition(0, 100, 100, 105);
+    Display.init();
 
-      Amiga.setPalette(16, 0xfff);
-      Amiga.setPalette(17, 0xfff);
-      Amiga.setPalette(18, 0xfff);
-      Amiga.setPalette(19, 0xfff);
+    Amiga.setDMA(
+      Amiga.DMA_BLITTER |
+      Amiga.DMA_COPPER |
+      Amiga.DMA_BITPLANE);
 
-      Amiga.setPalette(0, 0xf0f);
-      Amiga.setPalette(1, 0x000);
-    }
+    Amiga.clearDMA(Amiga.DMA_SPRITE);
+
+    // Show JavaGrinder Billion devices logo.
+    Image3Billion.show(copper);
+    Display.waitForVericalBlanks(80);
+
+    // After a pause, play Bach's Invention 13.
+    SongBach.play();
+    Display.waitForVericalBlanks(325);
+    Amiga.clearDMA(Amiga.DMA_AUDIO_0);
+
+    Display.clear();
+    Display.waitForVericalBlanks(5);
+
+    Stars.run(copper, blitter);
+    Logo.run(copper, blitter);
+
+    Amiga.clearDMA(Amiga.DMA_AUDIO_0 |
+                   Amiga.DMA_SPRITE);
+
+    Mandelbrot.run(copper, blitter);
+
+    while (true) { }
   }
 }
 

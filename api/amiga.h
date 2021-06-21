@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -18,6 +18,9 @@
 int amiga(JavaClass *java_class, Generator *generator, const char *method_name);
 int amiga(JavaClass *java_class, Generator *generator, const char *method_name, int const_val);
 int amiga(JavaClass *java_class, Generator *generator, const char *method_name, int const_val1, int const_val2);
+
+int copper(JavaClass *java_class, Generator *generator, const char *method_name);
+int blitter(JavaClass *java_class, Generator *generator, const char *method_name);
 
 #endif
 

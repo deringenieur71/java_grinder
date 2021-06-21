@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2019 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -27,6 +27,7 @@
 #include "generator/DotNet.h"
 #include "generator/DSPIC.h"
 #include "generator/Epiphany.h"
+#include "generator/Intellivision.h"
 #include "generator/M6502.h"
 #include "generator/M6502_8.h"
 #include "generator/MC68000.h"
@@ -35,9 +36,11 @@
 #include "generator/MSP430X.h"
 #include "generator/MCS51.h"
 #include "generator/MSX.h"
+#include "generator/Nintendo64.h"
 #include "generator/PIC32.h"
 #include "generator/Playstation2.h"
 #include "generator/Propeller.h"
+#include "generator/SegaDreamcast.h"
 #include "generator/SegaGenesis.h"
 #include "generator/SNES.h"
 #include "generator/STDC.h"
@@ -48,6 +51,7 @@
 #include "generator/W65816.h"
 #include "generator/W65C134SXB.h"
 #include "generator/W65C265SXB.h"
+#include "generator/WebAssembly.h"
 #include "generator/X86.h"
 #include "generator/X86_64.h"
 #include "generator/Z80.h"
@@ -142,6 +146,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new Epiphany();
   }
     else
+  if (strcasecmp("intellivision", chip_type) == 0)
+  {
+    generator = new Intellivision();
+  }
+    else
   if (strcasecmp("m6502", chip_type) == 0)
   {
     generator = new M6502();
@@ -187,6 +196,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new MSX();
   }
     else
+  if (strcasecmp("nintendo64", chip_type) == 0)
+  {
+    generator = new Nintendo64();
+  }
+    else
   if (strcasecmp("pic32", chip_type) == 0)
   {
     generator = new PIC32();
@@ -200,6 +214,11 @@ static Generator *new_generator(const char *chip_type)
   if (strcasecmp("propeller", chip_type) == 0)
   {
     generator = new Propeller();
+  }
+    else
+  if (strcasecmp("sega_dreamcast", chip_type) == 0)
+  {
+    generator = new SegaDreamcast();
   }
     else
   if (strcasecmp("sega_genesis", chip_type) == 0)
@@ -257,6 +276,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new W65C265SXB();
   }
     else
+  if (strcasecmp("webasm", chip_type) == 0)
+  {
+    generator = new WebAssembly();
+  }
+    else
   if (strcasecmp("x86", chip_type) == 0)
   {
     generator = new X86();
@@ -299,15 +323,18 @@ int main(int argc, char *argv[])
            "     -O0 turn off optimizer\n"
            "   platforms:\n"
            "     8051\n"
+           "     amiga\n"
            "     appleiigs\n"
            "     attiny2313, atmega328, atmega328p, attiny85, attiny84, attiny13,\n"
            "     dspic,\n"
+           "     intellivision,\n"
            "     m6502, c64\n"
            "     m6502_8, atari2600\n"
            "     mips32, pic32, playstation2\n"
            "     msp430g2231, msp430g2452, msp430g2553, msp430f5529\n"
+           "     nintendo64\n"
            "     propeller\n"
-           "     sega_genesis\n"
+           "     sega_dreamcast, sega_genesis\n"
            "     ti99\n"
            "     w65c134sxb, w65c265sxb\n"
            "     x86, x86_64\n"
@@ -395,8 +422,14 @@ int main(int argc, char *argv[])
     if (compiler->add_constants() == -1) { ret = -1; break; }
   } while(0);
 
-  // Add any extra hardcoded functions needed at the end.
-  generator->add_functions();
+  // Any subclass (CPU / system) in the Generator can add any extra
+  // functions and data sections needed to the assembly source before
+  // closing the file.
+  generator->finish();
+
+  // The main generator super class can add any extra functions or
+  // data sections before the file is close.
+  generator->close();
 
   delete generator;
   delete compiler;

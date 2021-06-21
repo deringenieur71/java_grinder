@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -21,6 +21,7 @@ public:
   virtual ~Playstation2();
 
   virtual int open(const char *filename);
+  virtual int finish();
   virtual int start_init();
   virtual int new_object(std::string &object_name, int field_count);
   virtual int draw3d_object_Constructor_X(int type, bool with_texture);

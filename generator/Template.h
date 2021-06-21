@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -67,6 +67,7 @@ public:
   virtual int integer_to_byte();
   virtual int integer_to_short();
   virtual int jump_cond(std::string &label, int cond, int distance);
+  //virtual int jump_cond_zero(std::string &label, int cond, int distance);
   virtual int jump_cond_integer(std::string &label, int cond, int distance);
   virtual int ternary(int cond, int value_true, int value_false);
   virtual int ternary(int cond, int compare, int value_true, int value_false);
@@ -99,8 +100,8 @@ public:
 
 protected:
   int reg;            // count number of registers are are using as stack
-  int reg_max;        // size of register stack 
-  int stack;          // count how many things we put on the stack
+  int reg_max;        // size of register stack
+  int stack;          // count how many things currently on the stack
   bool is_main : 1;
 };
 

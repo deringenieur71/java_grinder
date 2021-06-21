@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 #include "generator/MC68000.h"
 
@@ -45,7 +46,7 @@ MC68000::MC68000() :
   reg(0),
   reg_max(5),
   stack(0),
-  is_main(0)
+  is_main(false)
 {
 
 }
@@ -80,7 +81,10 @@ int MC68000::start_init()
   return 0;
 }
 
-int MC68000::insert_static_field_define(std::string &name, std::string &type, int index)
+int MC68000::insert_static_field_define(
+  std::string &name,
+  std::string &type,
+  int index)
 {
   fprintf(out, "%s equ ram_start+%d\n", name.c_str(), index * 4);
   return 0;
@@ -88,9 +92,9 @@ int MC68000::insert_static_field_define(std::string &name, std::string &type, in
 
 int MC68000::init_heap(int field_count)
 {
-  fprintf(out, "  ;; Set up heap and static initializers\n");
-  //fprintf(out, "  move.l #ram_start+%d, &ram_start\n", (field_count + 1) * 2);
+  fprintf(out, "  ;; Setup heap and static initializers\n");
   fprintf(out, "  movea.l #ram_start+%d, a5\n", field_count * 4);
+
   return 0;
 }
 
@@ -106,12 +110,16 @@ int MC68000::field_init_ref(std::string &name, int index)
   return 0;
 }
 
-void MC68000::method_start(int local_count, int max_stack, int param_count, std::string &name)
+void MC68000::method_start(
+  int local_count,
+  int max_stack,
+  int param_count,
+  std::string &name)
 {
   reg = 0;
   stack = 0;
 
-  is_main = (name == "main") ? true : false;
+  is_main = name == "main";
 
   // main() function goes here
   fprintf(out, "%s:\n", name.c_str());
@@ -260,8 +268,8 @@ int MC68000::dup()
 
 int MC68000::dup2()
 {
-  char reg1[8];
-  char reg2[8];
+  char reg1[16];
+  char reg2[16];
 
   fprintf(out, "  ;; dup2\n");
 
@@ -503,7 +511,7 @@ int MC68000::xor_integer()
 
 int MC68000::xor_integer(int num)
 {
-  fprintf(out, "  eor.l #%d, %s\n", num, top_reg());
+  fprintf(out, "  eori.l #%d, %s\n", num, top_reg());
   return 0;
 }
 
@@ -723,6 +731,8 @@ int MC68000::new_array(uint8_t type)
 {
   int array_length_reg;
 
+  fprintf(out, "  ; new_array()\n");
+
   // ref = heap + 4
   // heap = heap + sizeof(array) + 4 (to hold the length of the array)
 
@@ -746,6 +756,9 @@ int MC68000::new_array(uint8_t type)
   // sizeof(array) + 4 (for array size)
   fprintf(out, "  addq.l #4, a5\n");
 
+  // Store the size so it can be added back to heap pointer.
+  fprintf(out, "  move.l d%d, d5\n", REG_STACK(reg));
+
   // Top of Java stack should equal where the heap is currently pointing
   if (reg < reg_max)
   {
@@ -759,11 +772,14 @@ int MC68000::new_array(uint8_t type)
   }
 
   // Add the length of the array to heap pointer
-  fprintf(out, "  add.l d%d, a5\n", array_length_reg);
+  fprintf(out, "  add.l a5, d5\n");
 
   // Need to align heap
-  fprintf(out, "  addq.l #3, a5\n");
-  fprintf(out, "  and.l #0xfffffffc, a5\n");
+  fprintf(out, "  addq.l #3, d5\n");
+  fprintf(out, "  andi.l #0xfffffffc, d5\n");
+
+  // Update heap pointer.
+  fprintf(out, "  movea.l d5, a5\n");
 
   return 0;
 }
@@ -1090,7 +1106,7 @@ int MC68000::memory_allocStackBytes_I()
 int MC68000::memory_allocStackShorts_I()
 {
   const char *reg = top_reg();
-  fprintf(out, "  // allocStackShorts_I\n");
+  fprintf(out, "  ;; allocStackShorts_I\n");
   fprintf(out, "  move.l %s, d7\n", reg);
   fprintf(out, "  lsl.l #1, d7\n");
   fprintf(out, "  addq.l #3, d7\n");
@@ -1292,10 +1308,74 @@ int MC68000::get_ref_from_stack()
 
 int MC68000::get_jump_size(int distance)
 {
-  if (distance < 25) { return 's'; }
+  if (distance < 18) { return 's'; }
   if (distance < 20000) { return 'w'; }
 
   return 'l';
 }
 
+int MC68000::memory_preloadByteArray_X(const char *array_name)
+{
+  fprintf(out,
+    "  ;; memory_preloadByteArray_X(%s)\n"
+    "  lea (0,pc), a2\n"
+    "  adda.l #_%s-$+2, a2\n"
+    "  move.l a2, %s\n",
+    array_name,
+    array_name,
+    push_reg());
+
+  return 0;
+}
+
+int MC68000::memory_preloadIntArray_X(const char *array_name)
+{
+  fprintf(out,
+    "  ;; memory_preloadIntArray_X(%s)\n"
+    "  lea (0,pc), a2\n"
+    "  adda.l #_%s-$+2, a2\n"
+    "  move.l a2, %s\n",
+    array_name,
+    array_name,
+    push_reg());
+
+  return 0;
+}
+
+int MC68000::add_array_files()
+{
+  struct stat statbuf;
+  std::map<std::string, ArrayFiles>::iterator iter;
+
+  const char *constant = "dc32";
+
+  if (get_int_size() == 16)
+  {
+    constant = "dc16";
+  }
+  else if (get_int_size() == 8)
+  {
+    constant = "dc8";
+  }
+
+  for (iter = preload_arrays.begin(); iter != preload_arrays.end(); iter++)
+  {
+    if (stat(iter->first.c_str(), &statbuf) != 0)
+    {
+      printf("Error opening %s\n", iter->first.c_str());
+      return -1;
+    }
+
+    fprintf(out, ".align 32\n");
+    fprintf(out, "  %s %d\n",
+      constant,
+      (int)(iter->second.type == TYPE_BYTE ?
+            statbuf.st_size : statbuf.st_size / get_int_size()));
+
+    fprintf(out, "_%s:\n", iter->second.name.c_str());
+    fprintf(out, ".binfile \"%s\"\n\n", iter->first.c_str());
+  }
+
+  return 0;
+}
 

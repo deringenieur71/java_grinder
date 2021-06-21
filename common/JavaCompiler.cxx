@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2019 by Michael Kohn
  *
  */
 
@@ -277,7 +277,14 @@ void JavaCompiler::fill_label_map(uint8_t *label_map, int label_map_len, uint8_t
 }
 
 // FIXME - Too many parameters :(.
-int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name, uint8_t *bytes, int pc, int pc_end, int address, int const_val)
+int JavaCompiler::optimize_const(
+  JavaClass *java_class,
+  std::string &method_name,
+  uint8_t *bytes,
+  int pc,
+  int pc_end,
+  int address,
+  int const_val)
 {
   int const_vals[2];
 
@@ -361,7 +368,10 @@ int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name
   if (pc + 2 < pc_end && bytes[pc] == 0xc4 && bytes[pc+1] == 0x36)
   {
     if (generator->set_integer_local(GET_PC_UINT16(1), const_val) != 0)
-    { return 0; }
+    {
+      return 0;
+    }
+
     return 3;
   }
 
@@ -396,7 +406,9 @@ int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name
     int ref = GET_PC_UINT16(2);
 
     if (invoke_static(java_class, ref, generator, const_vals, 2) != 0)
-    { return 0; }
+    {
+      return 0;
+    }
 
     return 4;
   }
@@ -413,7 +425,9 @@ int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name
     int ref = GET_PC_UINT16(3);
 
     if (invoke_static(java_class, ref, generator, const_vals, 2) != 0)
-    { return 0; }
+    {
+      return 0;
+    }
 
     return 5;
   }
@@ -423,7 +437,14 @@ int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name
   return 0;
 }
 
-int JavaCompiler::optimize_const(JavaClass *java_class, std::string &method_name, uint8_t *bytes, int pc, int pc_end, int address, const char *const_val)
+int JavaCompiler::optimize_const(
+  JavaClass *java_class,
+  std::string &method_name,
+  uint8_t *bytes,
+  int pc,
+  int pc_end,
+  int address,
+  const char *const_val)
 {
   // invokestatic with one String const
   if (pc + 2 < pc_end && bytes[pc] == 0xb8)
@@ -1753,6 +1774,8 @@ int JavaCompiler::compile_method(
           break;
         }
 
+        int index = java_class->get_field_index(field_name);
+
         if (gen32->tag == CONSTANT_METHODREF)
         {
           stack->push(ref);
@@ -1765,8 +1788,6 @@ int JavaCompiler::compile_method(
           else
         if (type[0] == 'L')
         {
-          int index = java_class->get_field_index(field_name);
-
           if (generator->get_static(field_name, index) != 0)
           {
             printf("Internal Error: get_static not implemented\n");
@@ -1778,12 +1799,14 @@ int JavaCompiler::compile_method(
 
           // This fixes Joe's demo (meant to deal with strings) kind of
           // gross with a strcmp :(  Maybe revisit later.
+#if 0
           if (type == "Ljava/lang/String;")
           {
             DEBUG_PRINT("  static is %s (will invoke)\n", field_name.c_str());
             //generator->push_ref(field_name);
             stack->push(ref);
           }
+#endif
         }
           else
         {
@@ -2081,7 +2104,11 @@ int JavaCompiler::compile_method(
         break;
     }
 
-    if (ret != 0) { break; }
+    if (ret != 0)
+    {
+      printf("** Error with %s (0x%02x) instruction\n", table_java_instr[bytes[pc]].name, bytes[pc]);
+      break;
+    }
 
     if (wide == 1)
     {
