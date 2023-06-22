@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2019 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -17,19 +17,30 @@
 
 #include "common/Compiler.h"
 #include "common/JavaClass.h"
-#include "common/stack.h"
+#include "common/Stack.h"
 #include "generator/Generator.h"
 
-#define GET_PC_INT16(a) ((int16_t)(((uint16_t)bytes[pc+a+0])<<8|bytes[pc+a+1]))
-#define GET_PC_UINT16(a) (((uint16_t)bytes[pc+a+0])<<8|bytes[pc+a+1])
-#define GET_PC_INT32(a) ((int32_t)((uint32_t)bytes[pc+a+0])<<24| \
-                        ((uint32_t)bytes[pc+a+1])<<16|\
-                        ((uint32_t)bytes[pc+a+2])<<8|\
-                         bytes[pc+a+3])
-#define GET_PC_UINT32(a) (((uint32_t)bytes[pc+a+0])<<24| \
-                         ((uint32_t)bytes[pc+a+1])<<16|\
-                         ((uint32_t)bytes[pc+a+2])<<8|\
-                          bytes[pc+a+3])
+#define GET_PC_INT16(a) \
+  ((int16_t) \
+   (((uint16_t)bytes[pc + a + 0]) << 8 | \
+     (uint16_t)bytes[pc + a + 1]))
+
+#define GET_PC_UINT16(a) \
+  (((uint16_t)bytes[pc + a + 0]) << 8 | \
+    (uint16_t)bytes[pc + a + 1])
+
+#define GET_PC_INT32(a) \
+  ((int32_t) \
+   (((uint32_t)bytes[pc + a + 0]) << 24 | \
+    ((uint32_t)bytes[pc + a + 1]) << 16 |\
+    ((uint32_t)bytes[pc + a + 2]) << 8  |\
+     (uint32_t)bytes[pc + a + 3]))
+
+#define GET_PC_UINT32(a) \
+  (((uint32_t)bytes[pc + a + 0]) << 24 | \
+   ((uint32_t)bytes[pc + a + 1]) << 16 | \
+   ((uint32_t)bytes[pc + a + 2]) <<  8 | \
+    (uint32_t)bytes[pc + a + 3])
 
 class JavaCompiler : public Compiler
 {
@@ -53,7 +64,7 @@ private:
   int optimize_compare(JavaClass *java_class, std::string &method_name, uint8_t *bytes, int pc, int pc_end, int address, int index);
   int array_load(JavaClass *java_class, int constant_id, uint8_t array_type);
   int array_store(JavaClass *java_class, int constant_id, uint8_t array_type);
-  int push_ref(int index, _stack *stack);
+  int push_ref(int index, Stack &stack);
   int compile_method(JavaClass *java_class, int method_id, const char *alt_name = NULL);
   int field_type_to_int(const char *field_type);
   const char *field_type_from_int(int type);

@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -23,6 +23,7 @@
 #include "generator/Atari2600.h"
 #include "generator/AVR8.h"
 #include "generator/C64.h"
+#include "generator/ColecoVision.h"
 #include "generator/CPC.h"
 #include "generator/DotNet.h"
 #include "generator/DSPIC.h"
@@ -36,6 +37,7 @@
 #include "generator/MSP430X.h"
 #include "generator/MCS51.h"
 #include "generator/MSX.h"
+#include "generator/NES.h"
 #include "generator/Nintendo64.h"
 #include "generator/PIC32.h"
 #include "generator/Playstation2.h"
@@ -43,6 +45,7 @@
 #include "generator/SegaDreamcast.h"
 #include "generator/SegaGenesis.h"
 #include "generator/SNES.h"
+#include "generator/SleepyBee.h"
 #include "generator/STDC.h"
 #include "generator/TI84.h"
 #include "generator/TI99.h"
@@ -121,6 +124,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new C64();
   }
     else
+  if (strcasecmp("colecovision", chip_type) == 0)
+  {
+    generator = new ColecoVision();
+  }
+    else
   if (strcasecmp("cpc", chip_type) == 0)
   {
     generator = new CPC();
@@ -196,6 +204,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new MSX();
   }
     else
+  if (strcasecmp("nes", chip_type) == 0)
+  {
+    generator = new NES();
+  }
+    else
   if (strcasecmp("nintendo64", chip_type) == 0)
   {
     generator = new Nintendo64();
@@ -224,6 +237,11 @@ static Generator *new_generator(const char *chip_type)
   if (strcasecmp("sega_genesis", chip_type) == 0)
   {
     generator = new SegaGenesis();
+  }
+    else
+  if (strcasecmp("sleepy_bee", chip_type) == 0)
+  {
+    generator = new SleepyBee();
   }
     else
   if (strcasecmp("snes", chip_type) == 0)
@@ -322,7 +340,7 @@ int main(int argc, char *argv[])
            "     -v verbose output\n"
            "     -O0 turn off optimizer\n"
            "   platforms:\n"
-           "     8051\n"
+           "     8051, sleepy_bee\n"
            "     amiga\n"
            "     appleiigs\n"
            "     attiny2313, atmega328, atmega328p, attiny85, attiny84, attiny13,\n"
@@ -420,7 +438,7 @@ int main(int argc, char *argv[])
     if (compiler->compile_methods(false) == -1) { ret = -1; break; }
     // Add constants at end if needed.
     if (compiler->add_constants() == -1) { ret = -1; break; }
-  } while(0);
+  } while (false);
 
   // Any subclass (CPU / system) in the Generator can add any extra
   // functions and data sections needed to the assembly source before

@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.naken.cc/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -15,16 +15,16 @@ import net.mikekohn.java_grinder.draw3d.Draw3DObject;
 
 public class TriangleStrip extends Draw3DObject
 {
-   public TriangleStrip()
-   {
-   }
+  public TriangleStrip()
+  {
+  }
 
-   public TriangleStrip(String filename)
-   {
-   }
+  public TriangleStrip(String filename)
+  {
+  }
 
-   public TriangleStrip(int point_count)
-   {
-   }
+  public TriangleStrip(int point_count)
+  {
+  }
 }
 

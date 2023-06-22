@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2019 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -51,7 +51,7 @@ static int calc_distance(uint8_t *bytes, int pc, int pc_jump_to)
     pc = temp;
   }
 
-  while(pc < pc_jump_to)
+  while (pc < pc_jump_to)
   {
     if (bytes[pc] == 0xc4)
     {
@@ -210,7 +210,12 @@ int JavaCompiler::find_external_fields(JavaClass *java_class, bool is_parent)
   return external_field_count;
 }
 
-void JavaCompiler::fill_label_map(uint8_t *label_map, int label_map_len, uint8_t *bytes, int code_len, int pc_start)
+void JavaCompiler::fill_label_map(
+  uint8_t *label_map,
+  int label_map_len,
+  uint8_t *bytes,
+  int code_len,
+  int pc_start)
 {
   int pc = pc_start;
   int wide = 0;
@@ -218,13 +223,13 @@ void JavaCompiler::fill_label_map(uint8_t *label_map, int label_map_len, uint8_t
 
   memset(label_map, 0, label_map_len);
 
-  while(pc - pc_start < code_len)
+  while (pc - pc_start < code_len)
   {
     int opcode = bytes[pc];
 
     if (opcode == 0xc4) { wide = 1; pc++; continue; }
 
-    switch(opcode)
+    switch (opcode)
     {
         case 0x99:  // ifeq
         case 0x9a:  // ifne
@@ -298,15 +303,21 @@ int JavaCompiler::optimize_const(
   switch (bytes[pc])
   {
     case 54: // istore (0x36)
-      if (generator->set_integer_local(bytes[pc+1], const_val) != 0)
-      { return 0; }
+      if (generator->set_integer_local(bytes[pc + 1], const_val) != 0)
+      {
+        return 0;
+      }
+
       return 2;
     case 59: // istore_0 (0x3b)
     case 60: // istore_1 (0x3c)
     case 61: // istore_2 (0x3d)
     case 62: // istore_3 (0x3e)
       if (generator->set_integer_local(bytes[pc] - 0x3b, const_val) != 0)
-      { return 0; }
+      {
+        return 0;
+      }
+
       return 1;
     case 96: // iadd (0x60)
       if (generator->add_integer(const_val) != 0) { return 0; }
@@ -353,7 +364,7 @@ int JavaCompiler::optimize_const(
 
       label = method_name + "_" + std::to_string(jump_to);
 
-      if (generator->jump_cond_integer(label, cond_table[bytes[pc]-159], const_val, calc_distance(bytes, pc, pc + byte_count)) == -1)
+      if (generator->jump_cond_integer(label, cond_table[bytes[pc] - 159], const_val, calc_distance(bytes, pc, pc + byte_count)) == -1)
       {
         return 0;
       }
@@ -365,7 +376,7 @@ int JavaCompiler::optimize_const(
   }
 
   // istore wide
-  if (pc + 2 < pc_end && bytes[pc] == 0xc4 && bytes[pc+1] == 0x36)
+  if (pc + 2 < pc_end && bytes[pc] == 0xc4 && bytes[pc + 1] == 0x36)
   {
     if (generator->set_integer_local(GET_PC_UINT16(1), const_val) != 0)
     {
@@ -397,8 +408,9 @@ int JavaCompiler::optimize_const(
   // 07 (0x07) iconst_4
   // 08 (0x08) iconst_5
   if (pc + 3 < pc_end &&
-      bytes[pc] >= 0x02 && bytes[pc] <= 0x08 &&
-      bytes[pc+1] == 0xb8)
+      bytes[pc] >= 0x02 &&
+      bytes[pc] <= 0x08 &&
+      bytes[pc + 1] == 0xb8)
   {
     const_vals[0] = const_val;
     const_vals[1] = (int8_t)bytes[pc] - 3;
@@ -416,8 +428,8 @@ int JavaCompiler::optimize_const(
   // invokestatic with two const
   // 16 (0x10) bipush
   if (pc + 4 < pc_end &&
-      bytes[pc] == 0x10 &&
-      bytes[pc+2] == 0xb8)
+      bytes[pc + 0] == 0x10 &&
+      bytes[pc + 2] == 0xb8)
   {
     const_vals[0] = const_val;
     const_vals[1] = (int8_t)bytes[pc + 1];
@@ -462,7 +474,14 @@ int JavaCompiler::optimize_const(
   return 0;
 }
 
-int JavaCompiler::optimize_compare(JavaClass *java_class, std::string &method_name, uint8_t *bytes, int pc, int pc_end, int address, int index)
+int JavaCompiler::optimize_compare(
+  JavaClass *java_class,
+  std::string &method_name,
+  uint8_t *bytes,
+  int pc,
+  int pc_end,
+  int address,
+  int index)
 {
   int local_index = -1;
   bool check_for_compare = false;
@@ -492,7 +511,7 @@ int JavaCompiler::optimize_compare(JavaClass *java_class, std::string &method_na
       }
         else
       {
-        local_index = bytes[pc+1];
+        local_index = bytes[pc + 1];
         skip_bytes += 2;
       }
       if (local_index == index) { check_for_compare = true; }
@@ -540,7 +559,10 @@ int JavaCompiler::optimize_compare(JavaClass *java_class, std::string &method_na
   return 0;
 }
 
-int JavaCompiler::array_load(JavaClass *java_class, int constant_id, uint8_t array_type)
+int JavaCompiler::array_load(
+  JavaClass *java_class,
+  int constant_id,
+  uint8_t array_type)
 {
   generic_32bit_t *gen32;
   std::string field_name;
@@ -582,6 +604,11 @@ int JavaCompiler::array_load(JavaClass *java_class, int constant_id, uint8_t arr
       return generator->array_read_float(field_name, 0);
     }
       else
+    if (array_type == ARRAY_TYPE_LONG)
+    {
+      return generator->array_read_long(field_name, 0);
+    }
+      else
     if (array_type == ARRAY_TYPE_OBJECT)
     {
       return generator->array_read_object(field_name, 0);
@@ -596,7 +623,10 @@ int JavaCompiler::array_load(JavaClass *java_class, int constant_id, uint8_t arr
   return -1;
 }
 
-int JavaCompiler::array_store(JavaClass *java_class, int constant_id, uint8_t array_type)
+int JavaCompiler::array_store(
+  JavaClass *java_class,
+  int constant_id,
+  uint8_t array_type)
 {
   generic_32bit_t *gen32;
   std::string field_name;
@@ -638,6 +668,11 @@ int JavaCompiler::array_store(JavaClass *java_class, int constant_id, uint8_t ar
       return generator->array_write_float(field_name, 0);
     }
       else
+    if (array_type == ARRAY_TYPE_LONG)
+    {
+      return generator->array_write_long(field_name, 0);
+    }
+      else
     if (array_type == ARRAY_TYPE_OBJECT)
     {
       return generator->array_write_object(field_name, 0);
@@ -652,9 +687,9 @@ int JavaCompiler::array_store(JavaClass *java_class, int constant_id, uint8_t ar
   return -1;
 }
 
-int JavaCompiler::push_ref(int index, _stack *stack)
+int JavaCompiler::push_ref(int index, Stack &stack)
 {
-  int ref = stack->pop();
+  int ref = stack.pop();
   std::string field_name;
   std::string type;
   int ret;
@@ -709,7 +744,7 @@ int JavaCompiler::compile_method(
   std::string label;
   std::string method_name;
   std::string class_name;
-  _stack *stack;
+  Stack stack;
   int const_val;
   int skip_bytes;
   int index;
@@ -760,19 +795,20 @@ int JavaCompiler::compile_method(
   }
 
   // bytes points to the method attributes info for the method.
-  max_stack = ((int)bytes[0]<<8) | ((int)bytes[1]);
-  max_locals = ((int)bytes[2]<<8) | ((int)bytes[3]);
-  code_len = ((int)bytes[4]<<24) |
-             ((int)bytes[5]<<16) |
-             ((int)bytes[6]<<8) |
+  max_stack  = ((int)bytes[0] << 8) | (int)bytes[1];
+  max_locals = ((int)bytes[2] << 8) | (int)bytes[3];
+
+  code_len = ((int)bytes[4] << 24) |
+             ((int)bytes[5] << 16) |
+             ((int)bytes[6] << 8) |
              ((int)bytes[7]);
-  pc_start = (((int)bytes[code_len+8]<<8) |
-             ((int)bytes[code_len+9])) + 8;
+
+  pc_start = (((int)bytes[code_len + 8] << 8) |
+              ((int)bytes[code_len + 9])) + 8;
   pc = pc_start;
 
   generator->method_start(max_locals, max_stack, param_count, method_name);
-  stack = (_stack *)alloca(max_stack * sizeof(uint32_t) + sizeof(uint32_t));
-  stack->reset();
+  stack.reset();
 
   int label_map_len = (code_len / 8) + 1;
   label_map = (uint8_t *)alloca(label_map_len);
@@ -787,7 +823,7 @@ int JavaCompiler::compile_method(
 
   generator->instruction_count_clear();
 
-  while(pc - pc_start < code_len)
+  while (pc - pc_start < code_len)
   {
     int address = pc - pc_start;
     skip_bytes = 0;
@@ -807,7 +843,7 @@ int JavaCompiler::compile_method(
     // possible to unpop the array pointer from the stack.
     generator->instruction_count_inc();
 
-    switch(bytes[pc])
+    switch (bytes[pc])
     {
       case 0: // nop (0x00)
         break;
@@ -824,8 +860,16 @@ int JavaCompiler::compile_method(
       case 7: // iconst_4 (0x07)
       case 8: // iconst_5 (0x08)
         const_val = uint8_t(bytes[pc]) - 3;
-        ret = optimize_const(java_class, method_name, bytes, pc + 1,
-                             pc_start + code_len, address + 1, const_val);
+
+        ret = optimize_const(
+          java_class,
+          method_name,
+          bytes,
+          pc + 1,
+          pc_start + code_len,
+          address + 1,
+          const_val);
+
         if (ret == 0)
         {
           ret = generator->push_int(const_val);
@@ -863,9 +907,17 @@ int JavaCompiler::compile_method(
         break;
 
       case 16: // bipush (0x10)
-        const_val = (int8_t)bytes[pc+1];
-        ret = optimize_const(java_class, method_name, bytes, pc + 2,
-                             pc_start + code_len, address + 2, const_val);
+        const_val = (int8_t)bytes[pc + 1];
+
+        ret = optimize_const(
+          java_class,
+          method_name,
+          bytes,
+          pc + 2,
+          pc_start + code_len,
+          address + 2,
+          const_val);
+
         if (ret == 0)
         {
           ret = generator->push_int(const_val);
@@ -878,9 +930,17 @@ int JavaCompiler::compile_method(
         break;
 
       case 17: // sipush (0x11)
-        const_val = (int16_t)((bytes[pc+1]<<8)|(bytes[pc+2]));
-        ret = optimize_const(java_class, method_name, bytes, pc + 3,
-                             pc_start + code_len, address + 3, const_val);
+        const_val = (int16_t)((bytes[pc + 1] << 8) | bytes[pc + 2]);
+
+        ret = optimize_const(
+          java_class,
+          method_name,
+          bytes,
+          pc + 3,
+          pc_start + code_len,
+          address + 3,
+          const_val);
+
         if (ret == 0)
         {
           ret = generator->push_int(const_val);
@@ -893,7 +953,7 @@ int JavaCompiler::compile_method(
         break;
 
       case 18: // ldc (0x12)
-        index = bytes[pc+1];
+        index = bytes[pc + 1];
         instruction_length = 2;
       case 19: // ldc_w (0x13)
         if (bytes[pc] == 0x13)
@@ -909,9 +969,16 @@ int JavaCompiler::compile_method(
         if (gen32->tag == CONSTANT_INTEGER)
         {
           const_val = gen32->value;
-          ret = optimize_const(java_class, method_name, bytes,
-                               pc + instruction_length, pc_start + code_len,
-                               address + instruction_length, const_val);
+
+          ret = optimize_const(
+            java_class,
+            method_name,
+            bytes,
+            pc + instruction_length,
+            pc_start + code_len,
+            address + instruction_length,
+            const_val);
+
           if (ret == 0)
           {
             ret = generator->push_int(const_val);
@@ -934,23 +1001,35 @@ int JavaCompiler::compile_method(
           constant_string_t *constant_string = (constant_string_t *)gen32;
           const_val = constant_string->string_index;
 
-          // I think this is wrong.. why use the index to the string?
-#if 0
-          ret = optimize_const(java_class, method_name, bytes,
-                               pc + instruction_length, pc_start + code_len,
-                               address + instruction_length, const_val);
+          // FIXME: I think this is wrong.. why use the index to the string?
+          // 2022-Jan-29: This appears to be fine and is needed for the
+          // CPU.asm(String code) feature. Not sure why I commented this out
+          // earlier.
+//#if 0
+          ret = optimize_const(
+            java_class,
+            method_name,
+            bytes,
+            pc + instruction_length,
+            pc_start + code_len,
+            address + instruction_length,
+            const_val);
 
-          //if (ret == 0)
-#endif
+          if (ret == 0)
+//#endif
           {
             std::string data;
 
             java_class->get_name_constant(data, const_val);
 
-            ret = optimize_const(java_class, method_name, bytes,
-                                 pc + instruction_length,
-                                 pc_start + code_len,
-                                 address + instruction_length, data.c_str());
+            ret = optimize_const(
+              java_class,
+              method_name,
+              bytes,
+              pc + instruction_length,
+              pc_start + code_len,
+              address + instruction_length,
+              data.c_str());
           }
 
           if (ret == 0)
@@ -981,18 +1060,23 @@ int JavaCompiler::compile_method(
       case 21: // iload (0x15)
         if (wide == 1)
         {
-          //PUSH_INTEGER(local_vars[GET_PC_UINT16(1)]);
           ret = generator->push_local_var_int(GET_PC_UINT16(1));
         }
           else
         {
-          //PUSH_INTEGER(local_vars[bytes[pc+1]]);
-          ret = generator->push_local_var_int(bytes[pc+1]);
+          ret = generator->push_local_var_int(bytes[pc + 1]);
         }
         break;
 
       case 22: // lload (0x16)
-        UNIMPL()
+        if (wide == 1)
+        {
+          ret = generator->push_local_var_long(GET_PC_UINT16(1));
+        }
+          else
+        {
+          ret = generator->push_local_var_long(bytes[pc + 1]);
+        }
         break;
 
       case 23: // fload (0x17)
@@ -1002,7 +1086,7 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          index = bytes[pc+1];
+          index = bytes[pc + 1];
         }
 
         ret = generator->push_local_var_float(index);
@@ -1019,7 +1103,7 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          index = bytes[pc+1];
+          index = bytes[pc + 1];
         }
 
         ret = generator->push_local_var_ref(index);
@@ -1065,22 +1149,38 @@ int JavaCompiler::compile_method(
         break;
 
       case 46: // iaload (0x2e)
-        if (stack->length() == 0)
-        { ret = generator->array_read_int(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_int();
+        }
           else
-        { ret = array_load(java_class, stack->pop(), ARRAY_TYPE_INT); }
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_INT);
+        }
 
         break;
 
       case 47: // laload (0x2f)
-        UNIMPL()
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_long();
+        }
+          else
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_LONG);
+        }
+        break;
         break;
 
       case 48: // faload (0x30)
-        if (stack->length() == 0)
-        { ret = generator->array_read_float(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_float();
+        }
           else
-        { ret = array_load(java_class, stack->pop(), ARRAY_TYPE_FLOAT); }
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_FLOAT);
+        }
         break;
 
       case 49: // daload (0x31)
@@ -1088,18 +1188,25 @@ int JavaCompiler::compile_method(
         break;
 
       case 50: // aaload (0x32)
-        if (stack->length() == 0)
-        { ret = generator->array_read_object(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_object();
+        }
           else
-        { ret = array_load(java_class, stack->pop(), ARRAY_TYPE_OBJECT); }
-        break;
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_OBJECT);
+        }
         break;
 
       case 51: // baload (0x33)
-        if (stack->length() == 0)
-        { ret = generator->array_read_byte(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_byte();
+        }
           else
-        { ret = array_load(java_class, stack->pop(), ARRAY_TYPE_BYTE); }
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_BYTE);
+        }
         break;
 
       case 52: // caload (0x34)
@@ -1107,10 +1214,14 @@ int JavaCompiler::compile_method(
         break;
 
       case 53: // saload (0x35)
-        if (stack->length() == 0)
-        { ret = generator->array_read_short(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_read_short();
+        }
           else
-        { ret = array_load(java_class, stack->pop(), ARRAY_TYPE_SHORT); }
+        {
+          ret = array_load(java_class, stack.pop(), ARRAY_TYPE_SHORT);
+        }
         break;
 
       case 54: // istore (0x36)
@@ -1120,13 +1231,21 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          ret = generator->pop_local_var_int(bytes[pc+1]);
+          ret = generator->pop_local_var_int(bytes[pc + 1]);
         }
 
         break;
 
       case 55: // lstore (0x37)
-        UNIMPL()
+        // Pop long off stack and store in local variable
+        if (wide == 1)
+        {
+          ret = generator->pop_local_var_long(GET_PC_UINT16(1));
+        }
+          else
+        {
+          ret = generator->pop_local_var_long(bytes[pc + 1]);
+        }
         break;
 
       case 56: // fstore (0x38)
@@ -1137,7 +1256,7 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          ret = generator->pop_local_var_float(bytes[pc+1]);
+          ret = generator->pop_local_var_float(bytes[pc + 1]);
         }
         break;
 
@@ -1152,13 +1271,18 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          index = bytes[pc+1];
+          index = bytes[pc + 1];
         }
 
-        if (stack->length() == 0)
-        { ret = generator->pop_local_var_ref(index); }
+        if (stack.length() == 0)
+        {
+          ret = generator->pop_local_var_ref(index);
+        }
           else
-        { ret = push_ref(index, stack); }
+        {
+          ret = push_ref(index, stack);
+        }
+
         break;
 
       case 59: // istore_0 (0x3b)
@@ -1166,14 +1290,14 @@ int JavaCompiler::compile_method(
       case 61: // istore_2 (0x3d)
       case 62: // istore_3 (0x3e)
         // Pop integer off stack and store in local variable
-        ret = generator->pop_local_var_int(bytes[pc]-59);
+        ret = generator->pop_local_var_int(bytes[pc] - 59);
 
-        if (optimize == 1 && !needs_label(label_map, pc+1, pc_start) &&
-            bytes[pc+1] == 26 + (bytes[pc]-59))
+        if (optimize == 1 && !needs_label(label_map, pc + 1, pc_start) &&
+            bytes[pc + 1] == 26 + (bytes[pc] - 59))
         {
           if (generator->push_fake() == 0)
           {
-            pc += table_java_instr[bytes[pc+1]].normal;
+            pc += table_java_instr[bytes[pc + 1]].normal;
           }
         }
 
@@ -1184,8 +1308,7 @@ int JavaCompiler::compile_method(
       case 65: // lstore_2 (0x41)
       case 66: // lstore_3 (0x42)
         // Pop long off stack and store in local variable
-        //ret = generator->pop_long_local(bytes[pc]-63);
-        UNIMPL()
+        ret = generator->pop_local_var_long(bytes[pc] - 63);
         break;
 
       case 67: // fstore_0 (0x43)
@@ -1193,7 +1316,7 @@ int JavaCompiler::compile_method(
       case 69: // fstore_2 (0x45)
       case 70: // fstore_3 (0x46)
         // Pop float off stack and store in local variable
-        ret = generator->pop_local_var_float(bytes[pc]-67);
+        ret = generator->pop_local_var_float(bytes[pc] - 67);
         break;
 
       case 71: // dstore_0 (0x47)
@@ -1218,17 +1341,27 @@ int JavaCompiler::compile_method(
       case 78: // astore_3 (0x4e)
         // Pop ref off stack and store in local variable
         index = bytes[pc] - 75;
-        if (stack->length() == 0)
-        { ret = generator->pop_local_var_ref(index); }
+        if (stack.length() == 0)
+        {
+          ret = generator->pop_local_var_ref(index);
+        }
           else
-        { ret = push_ref(index, stack); }
+        {
+          ret = push_ref(index, stack);
+        }
+
         break;
 
       case 79: // iastore (0x4f)
-        if (stack->length() == 0)
-        { ret = generator->array_write_int(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_int();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_INT); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_INT);
+        }
+
         break;
 
       case 80: // lastore (0x50)
@@ -1236,10 +1369,15 @@ int JavaCompiler::compile_method(
         break;
 
       case 81: // fastore (0x51)
-        if (stack->length() == 0)
-        { ret = generator->array_write_float(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_float();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_FLOAT); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_FLOAT);
+        }
+
         break;
 
       case 82: // dastore (0x52)
@@ -1247,31 +1385,51 @@ int JavaCompiler::compile_method(
         break;
 
       case 83: // aastore (0x53)
-        if (stack->length() == 0)
-        { ret = generator->array_write_object(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_object();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_OBJECT); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_OBJECT);
+        }
+
         break;
 
       case 84: // bastore (0x54)
-        if (stack->length() == 0)
-        { ret = generator->array_write_byte(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_byte();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_BYTE); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_BYTE);
+        }
+
         break;
 
       case 85: // castore (0x55)
-        if (stack->length() == 0)
-        { ret = generator->array_write_short(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_short();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_CHAR); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_CHAR);
+        }
+
         break;
 
       case 86: // sastore (0x56)
-        if (stack->length() == 0)
-        { ret = generator->array_write_short(); }
+        if (stack.length() == 0)
+        {
+          ret = generator->array_write_short();
+        }
           else
-        { ret = array_store(java_class, stack->pop(), ARRAY_TYPE_SHORT); }
+        {
+          ret = array_store(java_class, stack.pop(), ARRAY_TYPE_SHORT);
+        }
+
         break;
 
       case 87: // pop (0x57)
@@ -1324,8 +1482,7 @@ int JavaCompiler::compile_method(
 
       case 97: // ladd (0x61)
         // Pop top two longs from stack, add them, push result
-        // ret = generator->add_longs();
-        UNIMPL()
+        ret = generator->add_long();
         break;
 
       case 98: // fadd (0x62)
@@ -1347,9 +1504,7 @@ int JavaCompiler::compile_method(
 
       case 101: // lsub (0x65)
         // Pop top two longs from stack, subtract them, push result
-        // *(stack-1) - *(stack-0)
-        // ret = generator->sub_longs();
-        UNIMPL()
+        ret = generator->sub_long();
         break;
 
       case 102: // fsub (0x66)
@@ -1371,8 +1526,7 @@ int JavaCompiler::compile_method(
 
       case 105: // lmul (0x69)
         // Pop top two longs from stack, multiply them, push result
-        // ret = generator->mul_longs();
-        UNIMPL()
+        ret = generator->mul_long();
         break;
 
       case 106: // fmul (0x6a)
@@ -1392,7 +1546,7 @@ int JavaCompiler::compile_method(
         break;
 
       case 109: // ldiv (0x6d)
-        UNIMPL()
+        ret = generator->div_long();
         break;
 
       case 110: // fdiv (0x6e)
@@ -1409,7 +1563,7 @@ int JavaCompiler::compile_method(
         break;
 
       case 113: // lrem (0x71)
-        UNIMPL()
+        ret = generator->mod_long();
         break;
 
       case 114: // frem (0x72)
@@ -1427,7 +1581,7 @@ int JavaCompiler::compile_method(
 
       case 117: // lneg (0x75)
         // negate the top long on the stack
-        UNIMPL()
+        ret = generator->neg_long();
         break;
 
       case 118: // fneg (0x76)
@@ -1440,38 +1594,32 @@ int JavaCompiler::compile_method(
 
       case 120: // ishl (0x78)
         // Pop two integer values from stack shift left and push result
-        // *(stack-1) << *(stack-0)
         ret = generator->shift_left_integer();
         break;
 
       case 121: // lshl (0x79)
         // Pop two long values from stack shift left and push result
-        // *(stack-1) << *(stack-0)
-        UNIMPL()
+        ret = generator->shift_left_long();
         break;
 
       case 122: // ishr (0x7a)
         // Pop two integer values from stack shift right and push result
-        // *(stack-1) >> *(stack-0)
         ret = generator->shift_right_integer();
         break;
 
       case 123: // lshr (0x7b)
         // Pop two long values from stack shift right and push result
-        // *(stack-1) >> *(stack-0)
-        UNIMPL()
+        ret = generator->shift_right_long();
         break;
 
       case 124: // iushr (0x7c)
         // Pop two unsigned integer values from stack shift left and push result
-        // *(stack-1) <<< *(stack-0)
         ret = generator->shift_right_uinteger();
         break;
 
       case 125: // lushr (0x7d)
         // Pop two unsigned long values from stack shift left and push result
-        // *(stack-1) <<< *(stack-0)
-        UNIMPL()
+        ret = generator->shift_right_ulong();
         break;
 
       case 126: // iand (0x7e)
@@ -1481,7 +1629,7 @@ int JavaCompiler::compile_method(
 
       case 127: // land (0x7f)
         // Pop top two longs from stack, and them, push result
-        UNIMPL()
+        ret = generator->and_long();
         break;
 
       case 128: // ior (0x80)
@@ -1491,7 +1639,7 @@ int JavaCompiler::compile_method(
 
       case 129: // lor (0x81)
         // Pop top two longs from stack, or them, push result
-        UNIMPL()
+        ret = generator->or_long();
         break;
 
       case 130: // ixor (0x82)
@@ -1501,7 +1649,7 @@ int JavaCompiler::compile_method(
 
       case 131: // lxor (0x83)
         // Pop top two longs from stack, xor them, push result
-        UNIMPL()
+        ret = generator->xor_long();
         break;
 
       case 132: // iinc (0x84)
@@ -1513,8 +1661,8 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          index = bytes[pc+1];
-          ret = generator->inc_integer(index, (int8_t)bytes[pc+2]);
+          index = bytes[pc + 1];
+          ret = generator->inc_integer(index, (int8_t)bytes[pc + 2]);
           instruction_length = table_java_instr[bytes[pc]].normal;
         }
 
@@ -1526,7 +1674,7 @@ int JavaCompiler::compile_method(
 
       case 133: // i2l (0x85)
         // Pop top integer from stack and push as a long
-        UNIMPL()
+        ret = generator->integer_to_long();
         break;
 
       case 134: // i2f (0x86)
@@ -1541,7 +1689,7 @@ int JavaCompiler::compile_method(
 
       case 136: // l2i (0x88)
         // Pop top long from stack and push as a integer
-        UNIMPL()
+        ret = generator->long_to_integer();
         break;
 
       case 137: // l2f (0x89)
@@ -1600,12 +1748,12 @@ int JavaCompiler::compile_method(
         break;
 
       case 148: // lcmp (0x94)
-        UNIMPL()
+        ret = generator->compare_longs();
         break;
 
       case 149: // fcmpl (0x95)
       case 150: // fcmpg (0x96)
-        ret = generator->compare_floats(bytes[pc]-149);
+        ret = generator->compare_floats(bytes[pc] - 149);
         break;
 
       case 151: // dcmpl (0x97)
@@ -1703,8 +1851,8 @@ int JavaCompiler::compile_method(
         }
           else
         {
-          //pc = local_vars[bytes[pc+1]];
-          ret = generator->return_local(bytes[pc+1], max_locals);
+          //pc = local_vars[bytes[pc + 1]];
+          ret = generator->return_local(bytes[pc + 1], max_locals);
           pc += 2;
         }
 #endif
@@ -1720,35 +1868,19 @@ int JavaCompiler::compile_method(
         break;
 
       case 172: // ireturn (0xac)
-        //value1 = POP_INTEGER()
-        //stack_values = java_stack->values;
-        //stack_types = java_stack->types;
-        //PUSH_INTEGER(value1);
         ret = generator->return_integer(max_locals);
         break;
 
       case 173: // lreturn (0xad)
-        UNIMPL()
-        //lvalue1 = POP_LONG()
-        //stack_values = java_stack->values;
-        //stack_types = java_stack->types;
-        //PUSH_LONG(lvalue1);
+        ret = generator->return_long(max_locals);
         break;
 
       case 174: // freturn (0xae)
         UNIMPL()
-        //value1 = POP_INTEGER()
-        //stack_values = java_stack->values;
-        //stack_types = java_stack->types;
-        //PUSH_INTEGER(value1);
         break;
 
       case 175: // dreturn (0xaf)
         UNIMPL()
-        //dvalue1 = POP_DOUBLE()
-        //stack_values = java_stack->values;
-        //stack_types = java_stack->types;
-        //PUSH_LONG(dvalue1);
         break;
 
       case 176: // areturn (0xb0)
@@ -1778,7 +1910,7 @@ int JavaCompiler::compile_method(
 
         if (gen32->tag == CONSTANT_METHODREF)
         {
-          stack->push(ref);
+          stack.push(ref);
         }
           else
         if (type[0] == '[')
@@ -1804,7 +1936,7 @@ int JavaCompiler::compile_method(
           {
             DEBUG_PRINT("  static is %s (will invoke)\n", field_name.c_str());
             //generator->push_ref(field_name);
-            stack->push(ref);
+            stack.push(ref);
           }
 #endif
         }
@@ -1830,12 +1962,12 @@ int JavaCompiler::compile_method(
           break;
         }
 
-        if (stack->length() != 0)
+        if (stack.length() != 0)
         {
           std::string field_name;
           std::string type;
 
-          if (java_class->get_ref_name_type(field_name, type, stack->pop()) != 0)
+          if (java_class->get_ref_name_type(field_name, type, stack.pop()) != 0)
           {
             printf("Error retrieving field name %d\n", ref);
             ret = -1;
@@ -1861,13 +1993,13 @@ int JavaCompiler::compile_method(
       case 182: // invokevirtual (0xb6)
         ref = GET_PC_UINT16(1);
 
-        if (stack->length() == 0)
+        if (stack.length() == 0)
         {
           ret = invoke_virtual(java_class, ref, generator);
         }
           else
         {
-          ret = invoke_virtual(java_class, ref, stack->pop(), generator);
+          ret = invoke_virtual(java_class, ref, stack.pop(), generator);
         }
 
         break;
@@ -1900,7 +2032,7 @@ int JavaCompiler::compile_method(
         break;
 
       case 188: // newarray (0xbc)
-        ret = generator->new_array(bytes[pc+1]);
+        ret = generator->new_array(bytes[pc + 1]);
         break;
 
       case 189: // anewarray (0xbd)
@@ -1910,12 +2042,12 @@ int JavaCompiler::compile_method(
         break;
 
       case 190: // arraylength (0xbe)
-        DEBUG_PRINT("stack->length()=%d\n", stack->length());
+        DEBUG_PRINT("stack.length()=%d\n", stack.length());
 
         // FIXME - This is may not be correct
-        if (stack->length() > 0)
+        if (stack.length() > 0)
         {
-          uint32_t value = stack->pop();
+          uint32_t value = stack.pop();
           gen32 = (generic_32bit_t *)java_class->get_constant(value);
           if (gen32->tag == CONSTANT_FIELDREF)
           {
@@ -2149,7 +2281,7 @@ int JavaCompiler::load_class(const char *filename)
   DEBUG_PRINT("load_class(%s)\n", filename);
 
   ptr = 0;
-  while(filename[ptr] != 0)
+  while (filename[ptr] != 0)
   {
     if (filename[ptr] == '/') { last_slash = ptr; }
     if (filename[ptr] == '\\') { last_slash = ptr; }  // DOS :( come on now :(
@@ -2506,7 +2638,7 @@ int JavaCompiler::get_const(uint8_t *bytes, int len, int address, int *value)
       return -1;
     }
 
-    switch(bytes[address + 1])
+    switch (bytes[address + 1])
     {
     }
 
@@ -2521,7 +2653,7 @@ int JavaCompiler::get_const(uint8_t *bytes, int len, int address, int *value)
       return -1;
     }
 
-    switch(bytes[address])
+    switch (bytes[address])
     {
       case 1: // aconst_null (0x01)
         *value = 0;
@@ -2547,7 +2679,7 @@ int JavaCompiler::get_cond(uint8_t *bytes, int len, int address, int *cond, int 
 {
   if (table_java_instr[bytes[address]].op_type != OP_TYPE_IF) { return -1; }
 
-  switch(bytes[address])
+  switch (bytes[address])
   {
     case 153: // ifeq (0x99)
     case 159: // if_icmpeq (0x9f)

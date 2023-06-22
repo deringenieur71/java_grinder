@@ -5,16 +5,19 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn, Joe Davisson
- *
- * MCS-51 (8051) written by Joe Davisson
+ * Copyright 2014-2022 by Michael Kohn, Joe Davisson
  *
  */
 
-#ifndef JAVA_GRINDER_GENERATOR_TEMPLATE_H
-#define JAVA_GRINDER_GENERATOR_TEMPLATE_H
+#ifndef JAVA_GRINDER_GENERATOR_MCS51_H
+#define JAVA_GRINDER_GENERATOR_MCS51_H
 
 #include "generator/Generator.h"
+
+#define REG_STACK_LO(a) ((a) * 2)
+#define REG_STACK_HI(a) (((a) * 2) + 1)
+#define REG_ADDRESS_STACK_LO(a) (((a) * 2) + 8)
+#define REG_ADDRESS_STACK_HI(a) ((((a) * 2) + 1) + 8)
 
 class MCS51 : public Generator
 {
@@ -99,13 +102,27 @@ public:
   virtual int array_write_short(std::string &name, int field_id);
   virtual int array_write_int(std::string &name, int field_id);
 
+  // GPIO methods.
+  virtual int ioport_setPinsValue_I(int port);
+  virtual int ioport_setPinsValue_I(int port, int const_val);
+  virtual int ioport_setPinsHigh_I(int port);
+  virtual int ioport_setPinsLow_I(int port);
+  virtual int ioport_setPinHigh_I(int port);
+  virtual int ioport_setPinHigh_I(int port, int const_val);
+  virtual int ioport_setPinLow_I(int port);
+  virtual int ioport_setPinLow_I(int port, int const_val);
+  virtual int ioport_isPinInputHigh_I(int port);
+  virtual int ioport_getPortInputValue(int port);
+
 protected:
   virtual int get_int_size() { return 2; }
+  void set_bit();
+  void set_bit(int position);
 
   int reg;            // count number of registers are are using as stack
   int reg_max;        // size of register stack 
-  int stack;          // count how many things we put on the stack
   bool is_main : 1;
+  bool has_array : 1;
 };
 
 #endif

@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.naken.cc/
+ *     Web: https://www.mikekohn.net/
  * License: GPL
  *
- * Copyright 2014-2018 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -18,6 +18,15 @@ public class CPU
   private CPU()
   {
   }
+
+  /** Set clock speed to 1MHz (internal crystal? DCO?) */
+  public static void setClock1() { }
+
+  /** Set clock speed to 2MHz (internal crystal? DCO?) */
+  public static void setClock2() { }
+
+  /** Set clock speed to 4MHz (internal crystal? DCO?) */
+  public static void setClock4() { }
 
   /** Set clock speed to 8MHz (internal crystal? DCO?) */
   public static void setClock8() { }

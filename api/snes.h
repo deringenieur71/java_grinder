@@ -5,9 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2018 by Michael Kohn
- *
- * SNES by Joe Davisson
+ * Copyright 2014-2021 by Michael Kohn
  *
  */
 
@@ -18,8 +16,19 @@
 #include "generator/Generator.h"
 
 int snes(JavaClass *java_class, Generator *generator, const char *method_name);
-int snes(JavaClass *java_class, Generator *generator, const char *method_name, int const_val);
-int snes(JavaClass *java_class, Generator *generator, const char *method_name, int const_val1, int const_val2);
+
+int snes(
+  JavaClass *java_class,
+  Generator *generator,
+  const char *method_name,
+  int const_val);
+
+int snes(
+  JavaClass *java_class,
+  Generator *generator,
+  const char *method_name,
+  int const_val1,
+  int const_val2);
 
 #endif
 

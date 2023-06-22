@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -26,22 +26,29 @@
 #include "api/cpc.h"
 #include "api/cpu.h"
 #include "api/dsp.h"
+#include "api/grinder.h"
+#include "api/i2c.h"
 #include "api/intellivision.h"
 #include "api/ioport.h"
 #include "api/joystick.h"
+#include "api/keyboard.h"
 #include "api/math.h"
 #include "api/memory.h"
 #include "api/msx.h"
+#include "api/nes.h"
+#include "api/nintendo64.h"
 #include "api/parallella.h"
 #include "api/playstation_2.h"
 #include "api/propeller.h"
 #include "api/sega_genesis.h"
 #include "api/spi.h"
 #include "api/snes.h"
+#include "api/sn76489.h"
 #include "api/sxb.h"
 #include "api/ti84.h"
 #include "api/ti99.h"
 #include "api/timer.h"
+#include "api/tms9918a.h"
 #include "api/trs80_coco.h"
 #include "api/uart.h"
 #include "api/watchdog.h"
@@ -142,6 +149,7 @@ int invoke_static(JavaClass *java_class, int method_id, Generator *generator)
   {
     const char *cls = method_class.c_str() + len;
 
+    CHECK(Grinder, grinder)
     CHECK(CPU, cpu)
     CHECK_WITH_PORT(IOPort, ioport, 0)
     CHECK_WITH_PORT(IOPort, ioport, 1)
@@ -162,17 +170,23 @@ int invoke_static(JavaClass *java_class, int method_id, Generator *generator)
     CHECK_WITH_PORT(SPI, spi, 1)
     CHECK_WITH_PORT(UART, uart, 0)
     CHECK_WITH_PORT(UART, uart, 1)
+    CHECK(I2C, i2c)
     CHECK(Intellivision, intellivision)
     CHECK(Joystick, joystick)
+    CHECK(Keyboard, keyboard)
     CHECK(Math, math)
     CHECK(MSX, msx)
+    CHECK(NES, nes)
+    CHECK(Nintendo64, nintendo64)
     CHECK(Parallella, parallella)
     CHECK(Playstation2, playstation2)
     CHECK(Propeller, propeller)
     CHECK(SegaGenesis, sega_genesis)
+    CHECK(SN76489, sn76489)
     CHECK(SNES, snes)
     CHECK(TI84, ti84)
     CHECK(TI99, ti99)
+    CHECK(TMS9918A, tms9918a)
     CHECK(TRS80Coco, trs80_coco)
     CHECK(SXB, sxb)
     CHECK(Watchdog, watchdog)
@@ -258,8 +272,12 @@ int invoke_static(
     CHECK_CONST(Timer, timer)
     CHECK_CONST(CPU, cpu)
     CHECK_CONST(CPC, cpc)
+    CHECK_CONST(I2C, i2c)
     CHECK_CONST(Joystick, joystick)
+    CHECK_CONST(Keyboard, keyboard)
     CHECK_CONST(MSX, msx)
+    CHECK_CONST(NES, nes)
+    CHECK_CONST(Nintendo64, nintendo64)
     CHECK_CONST(Parallella, parallella)
     CHECK_CONST(Playstation2, playstation2)
     CHECK_CONST(Propeller, propeller)
@@ -267,9 +285,12 @@ int invoke_static(
     CHECK_CONST(SNES, snes)
     CHECK_CONST(TRS80Coco, trs80_coco)
     CHECK_CONST(SXB, sxb)
+    CHECK_CONST(SN76489, sn76489)
     CHECK_WITH_PORT_CONST(SPI, spi, 0)
     CHECK_WITH_PORT_CONST(SPI, spi, 1)
-    CHECK_WITH_PORT_CONST(TI99, ti99, 0)
+    //CHECK_WITH_PORT_CONST(TI99, ti99, 0)
+    CHECK_CONST(TI99, ti99)
+    CHECK_CONST(TMS9918A, tms9918a)
     CHECK_WITH_PORT_CONST(UART, uart, 0)
     CHECK_WITH_PORT_CONST(UART, uart, 1)
     CHECK_CONST(Watchdog, watchdog)
@@ -286,7 +307,9 @@ int invoke_static(
     CHECK_CONST_2(CPC, cpc)
     CHECK_CONST_2(MSX, msx)
     CHECK_CONST_2(Playstation2, playstation2)
+    CHECK_CONST_2(SN76489, sn76489)
     CHECK_CONST_2(TI99, ti99)
+    CHECK_CONST_2(TMS9918A, tms9918a)
     CHECK_CONST_2(SegaGenesis, sega_genesis)
     CHECK_CONST_2(SNES, snes)
       else
@@ -337,12 +360,14 @@ int invoke_static(
     if (strcmp(cls, "Memory") == 0)
     {
       if (function == "preloadByteArray_X" ||
+          function == "preloadShortArray_X" ||
           function == "preloadIntArray_X")
       {
         char array_name[strlen(const_val) + 1];
         int ptr = 0;
         int type = TYPE_BYTE;
 
+        if (function == "preloadShortArray_X") { type = TYPE_SHORT; }
         if (function == "preloadIntArray_X") { type = TYPE_INT; }
 
         while(const_val[ptr] != 0)

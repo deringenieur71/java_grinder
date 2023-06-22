@@ -19,7 +19,9 @@ API= \
   api/dsp.o \
   api/draw3d_object.o \
   api/draw3d_texture.o \
+  api/grinder.o \
   api/intellivision.o \
+  api/i2c.o \
   api/invoke.o \
   api/invoke_static.o \
   api/invoke_virtual.o \
@@ -27,19 +29,24 @@ API= \
   api/java_lang_system.o \
   api/java_lang_string.o \
   api/joystick.o \
+  api/keyboard.o \
   api/math.o \
   api/memory.o \
   api/msx.o \
+  api/nes.o \
+  api/nintendo64.o \
   api/parallella.o \
   api/playstation_2.o \
   api/propeller.o \
   api/sega_genesis.o \
+  api/sn76489.o \
   api/snes.o \
   api/spi.o \
   api/sxb.o \
   api/ti84.o \
   api/ti99.o \
   api/timer.o \
+  api/tms9918a.o \
   api/trs80_coco.o \
   api/uart.o \
   api/watchdog.o \
@@ -78,8 +85,10 @@ SYSTEMS= \
   generator/AppleIIgs.o \
   generator/Atari2600.o \
   generator/C64.o \
+  generator/ColecoVision.o \
   generator/CPC.o \
   generator/MSX.o \
+  generator/NES.o \
   generator/Nintendo64.o \
   generator/Playstation2.o \
   generator/Playstation2VU0.o \
@@ -88,6 +97,7 @@ SYSTEMS= \
   generator/SegaDreamcast.o \
   generator/SegaGenesis.o \
   generator/SNES.o \
+  generator/SleepyBee.o \
   generator/TI84.o \
   generator/TI99.o \
   generator/TRS80Coco.o \

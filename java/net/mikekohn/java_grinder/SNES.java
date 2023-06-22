@@ -2,12 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.naken.cc/
+ *     Web: https://www.mikekohn.net/
  * License: GPL
  *
- * Copyright 2014-2015 by Michael Kohn
- *
- * SNES by Joe Davisson
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -17,6 +15,7 @@ abstract public class SNES
 {
   protected SNES() { }
 
-  public static void setBackgroundColor(int color) { }
+  /** Set value to a 16 bit number 0bbbbbgg gggrrrrr. */
+  public static void setBackgroundColor(int value) { }
 }
 

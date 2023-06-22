@@ -62,7 +62,7 @@ public class LCD
   static final int SPI_CLK = 0x20;
   static final int SPI_SDO = 0x40;
 
-  static public void main(String args[])
+  static public void main(String[] args)
   {
     int x=60,y=30;
     int dx=1,dy=1;
@@ -73,7 +73,7 @@ public class LCD
     CPU.setClock16();
 
     // Not sure how fast this can be
-    SPI0.init(SPI0.DIV8, 2);
+    SPI0.init(SPI0.DIV8, 3);
 
     // Setup IO port.
     // Pin 3 is LCD reset

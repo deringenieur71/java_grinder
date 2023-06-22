@@ -5,7 +5,7 @@
  *     Web: http://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn
+ * Copyright 2014-2022 by Michael Kohn
  *
  */
 
@@ -20,6 +20,13 @@ enum
   MSP430G2452,
   MSP430G2553,
   MSP430F5529,
+};
+
+enum
+{
+  SPI_TYPE_NONE,
+  SPI_TYPE_USI,
+  SPI_TYPE_USCI,
 };
 
 class MSP430 : public Generator
@@ -129,6 +136,7 @@ public:
   virtual int ioport_setPinLow_I(int port);
   virtual int ioport_setPinLow_I(int port, int const_val);
   virtual int ioport_isPinInputHigh_I(int port);
+  virtual int ioport_isPinInputHigh_I(int port, int const_val);
   virtual int ioport_getPortInputValue(int port);
   //virtual int ioport_setPortOutputValue_I(int port);
   virtual int ioport_setPinsResistorEnable_I(int port);
@@ -178,6 +186,9 @@ public:
   virtual int watchdog_kick();
 
   // CPU functions
+  virtual int cpu_setClock1();
+  virtual int cpu_setClock2();
+  virtual int cpu_setClock4();
   virtual int cpu_setClock8();
   virtual int cpu_setClock16();
   virtual int cpu_nop();
@@ -188,6 +199,16 @@ public:
   virtual int memory_read16_I();
   virtual int memory_write16_IS();
 
+  // i2c
+  virtual int i2c_init_I();
+  virtual int i2c_init_I(int clock_divisor);
+  virtual int i2c_disable();
+  virtual int i2c_enable();
+  virtual int i2c_start();
+  virtual int i2c_stop();
+  virtual int i2c_write_I();
+  virtual int i2c_read();
+
 protected:
   virtual int get_int_size() { return 2; }
   int set_periph(const char *instr, const char *periph);
@@ -197,6 +218,7 @@ protected:
   void push_reg(const char *reg);
   void pop_reg(char *reg);
   void insert_read_spi();
+  void insert_i2c();
   void insert_mul_integers();
   void insert_div_integers();
   int get_values_from_stack(int *value1, int *value2, int *value3);
@@ -209,15 +231,20 @@ protected:
   int label_count;
   char reg_string[16];
   bool need_read_spi : 1;
+  bool need_i2c : 1;
   bool need_mul_integers : 1;
   bool need_div_integers : 1;
   bool need_timer_interrupt : 1;
   bool is_main : 1;
   bool is_interrupt : 1;
+  bool has_usci : 1;
   uint32_t ram_start;
   uint32_t stack_start;
   uint32_t flash_start;
   int max_stack;
+  int cpu_speed;
+  uint8_t chip_type;
+  uint8_t spi_type;
   const char *include_file;
   uint16_t vector_timer;
 };
