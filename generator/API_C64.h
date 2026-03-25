@@ -45,7 +45,6 @@ public:
   virtual int c64_vic_sprite7pos() { return -1; }
   virtual int c64_vic_writeControl1() { return -1; }
   virtual int c64_vic_readControl1() { return -1; }
-  virtual int c64_vic_waitRaster() { return -1; }
   virtual int c64_vic_spriteEnable() { return -1; }
   virtual int c64_vic_writeControl2() { return -1; }
   virtual int c64_vic_readControl2() { return -1; }

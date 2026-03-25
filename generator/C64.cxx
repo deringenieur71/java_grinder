@@ -123,19 +123,19 @@ int C64::open(const char *filename)
   fprintf(out, "var_start equ 0x%04x\n", var_start);
 
   // for indirection (2 bytes)
-  fprintf(out, "address equ var_start + 0\n");
+  fprintf(out, "address equ 0x02\n");
 
   // points to locals
-  fprintf(out, "locals equ var_start + 2\n");
+  fprintf(out, "locals equ 0x04\n");
 
   // temp variables
-  fprintf(out, "result equ var_start + 4\n");
-  fprintf(out, "remainder equ var_start + 6\n");
-  fprintf(out, "length equ var_start + 8\n");
-  fprintf(out, "value1 equ var_start + 10\n");
-  fprintf(out, "value2 equ var_start + 12\n");
-  fprintf(out, "value3 equ var_start + 14\n");
-  fprintf(out, "value4 equ var_start + 16\n");
+  fprintf(out, "result equ 0x06\n");
+  fprintf(out, "remainder equ 0x08\n");
+  fprintf(out, "length equ 0x0a\n");
+  fprintf(out, "value1 equ 0x0c\n");
+  fprintf(out, "value2 equ 0x0e\n");
+  fprintf(out, "value3 equ 0x10\n");
+  fprintf(out, "value4 equ 0x12\n");
 
   // text/color tables
   fprintf(out, "text_table equ 0x18\n");
@@ -214,7 +214,7 @@ int C64::open(const char *filename)
   fprintf(out, "  and #0x7f\n");
   fprintf(out, "  sta 0xd011\n");
 
-  fprintf(out, "  lda #251\n");
+  fprintf(out, "  lda #255\n");
   fprintf(out, "  sta 0xd012\n");
 
   fprintf(out, "  lda #sprite_interrupt & 0xff\n");
@@ -570,19 +570,6 @@ int C64::c64_vic_sprite7pos(/* x, y */)
 
 int C64::c64_vic_writeControl1(/* value */) { POKE(0xd011); return 0; }
 int C64::c64_vic_readControl1() { PEEK(0xd011); return 0; }
-
-int C64::c64_vic_waitRaster(/* line */)
-{
-  fprintf(out, 
-    "; waitRaster\n"
-    "  inx\n"
-    "  lda stack_lo,x\n"
-    "  cmp 0xd012\n"
-    "  bne #-5\n");
-
-  return 0;
-}
-
 int C64::c64_vic_spriteEnable(/* value */) { POKE(0xd015); return 0; }
 int C64::c64_vic_writeControl2(/* value */) { POKE(0xd016); return 0; }
 int C64::c64_vic_readControl2() { PEEK(0xd016); return 0; }
@@ -1677,6 +1664,7 @@ void C64::insert_c64_vic_text_fill()
     "  inx\n"
     "  inx\n"
     "  inx\n"
+    "  inx\n"
     "  rts\n");
 }
 
@@ -1719,6 +1707,7 @@ void C64::insert_c64_vic_text_paint()
     "  sta address + 1\n"
     "  dec value1\n"
     "  bpl text_paint_loop_y\n"
+    "  inx\n"
     "  inx\n"
     "  inx\n"
     "  inx\n"
@@ -2186,6 +2175,7 @@ void C64::insert_c64_sprite_interrupt()
     "  pha\n"
     "  tya\n"
     "  pha\n"
+
     "  lda sprite_pos_x + 0\n"
     "  sta 0xd000\n"
     "  lda sprite_pos_y + 0\n"
@@ -2222,8 +2212,8 @@ void C64::insert_c64_sprite_interrupt()
     "  lda sprite_pos_x_msb\n"
     "  sta 0xd010\n"
 
-    "  lda #0xff\n"
-    "  sta 0xd019\n"
+    "  asl 0xd019\n"
+
     "  pla\n"
     "  tay\n"
     "  pla\n"

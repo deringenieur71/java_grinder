@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.mikekohn.net/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn
+ * Copyright 2014-2023 by Michael Kohn
  *
  */
 
@@ -50,7 +50,7 @@ public:
   //virtual int push_long(int64_t n);
   //virtual int push_float(float f);
   //virtual int push_double(double f);
-  virtual int push_ref(std::string &name);
+  virtual int push_ref(std::string &name, int index);
   virtual int pop_local_var_int(int index);
   virtual int pop_local_var_ref(int index);
   virtual int pop();
@@ -113,9 +113,9 @@ public:
   virtual int cpu_nop();
 
 protected:
-  int reg;            // count number of registers are are using as stack
+  int reg;            // count number of registers that are using as stack
   int reg_max;        // size of register stack 
-  int stack;          // count how many things we put on the stack
+  int stack;          // count how many things put on the stack
   uint32_t org;       // .org to use for this chip
   uint32_t ram_start; // start of ram
   uint32_t ram_end;   // end of ram

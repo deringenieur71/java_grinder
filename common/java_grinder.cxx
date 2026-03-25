@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.mikekohn.net/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2022 by Michael Kohn
+ * Copyright 2014-2023 by Michael Kohn
  *
  */
 
@@ -28,6 +28,7 @@
 #include "generator/DotNet.h"
 #include "generator/DSPIC.h"
 #include "generator/Epiphany.h"
+#include "generator/F100_L.h"
 #include "generator/Intellivision.h"
 #include "generator/M6502.h"
 #include "generator/M6502_8.h"
@@ -42,10 +43,13 @@
 #include "generator/PIC32.h"
 #include "generator/Playstation2.h"
 #include "generator/Propeller.h"
+#include "generator/RISCV.h"
+#include "generator/RISCVIceFun.h"
 #include "generator/SegaDreamcast.h"
 #include "generator/SegaGenesis.h"
 #include "generator/SNES.h"
 #include "generator/SleepyBee.h"
+#include "generator/R4000.h"
 #include "generator/STDC.h"
 #include "generator/TI84.h"
 #include "generator/TI99.h"
@@ -154,6 +158,11 @@ static Generator *new_generator(const char *chip_type)
     generator = new Epiphany();
   }
     else
+  if (strcasecmp("f100_l", chip_type) == 0)
+  {
+    generator = new F100_L();
+  }
+    else
   if (strcasecmp("intellivision", chip_type) == 0)
   {
     generator = new Intellivision();
@@ -254,6 +263,21 @@ static Generator *new_generator(const char *chip_type)
     generator = new STDC();
   }
     else
+  if (strcasecmp("r4000", chip_type) == 0)
+  {
+    generator = new R4000();
+  }
+    else
+  if (strcasecmp("riscv", chip_type) == 0)
+  {
+    generator = new RISCV();
+  }
+    else
+  if (strcasecmp("riscv_icefun", chip_type) == 0)
+  {
+    generator = new RISCVIceFun();
+  }
+    else
   if (strcasecmp("ti84plus", chip_type) == 0)
   {
     generator = new TI84(TI84_PLUS);
@@ -329,7 +353,7 @@ int main(int argc, char *argv[])
 
   printf("\nJava Grinder\n"
          "Authors: Michael Kohn, Joe Davisson, Carsten Dost\n"
-         "    Web: http://www.mikekohn.net/micro/java_grinder.php\n"
+         "    Web: https://www.mikekohn.net/micro/java_grinder.php\n"
          "  Email: mike@mikekohn.net\n\n"
          "Version: " VERSION "\n\n");
 

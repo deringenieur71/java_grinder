@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.mikekohn.net/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2019 by Michael Kohn, Joe Davisson
+ * Copyright 2014-2023 by Michael Kohn, Joe Davisson
  *
  * M6502 written by Joe Davisson
  *
@@ -351,7 +351,7 @@ int M6502::push_int(int32_t n)
   return 0;
 }
 
-int M6502::push_ref(std::string &name)
+int M6502::push_ref(std::string &name, int index)
 {
   fprintf(out, "; push_ref\n");
   fprintf(out, "  lda %s + 0\n", name.c_str());
@@ -589,8 +589,7 @@ int M6502::and_integer()
 
 int M6502::and_integer(int const_val)
 {
-  fprintf(out, "; and_integer (const_val)");
-  fprintf(out, "  inx\n");
+  fprintf(out, "; and_integer (const_val)\n");
   fprintf(out, "  lda #%d\n", const_val & 0xff);
   fprintf(out, "  and stack_lo + 1,x\n");
   fprintf(out, "  sta stack_lo + 1,x\n");
@@ -612,8 +611,7 @@ int M6502::or_integer()
 
 int M6502::or_integer(int const_val)
 {
-  fprintf(out, "; or_integer (const_val)");
-  fprintf(out, "  inx\n");
+  fprintf(out, "; or_integer (const_val)\n");
   fprintf(out, "  lda #%d\n", const_val & 0xff);
   fprintf(out, "  ora stack_lo + 1,x\n");
   fprintf(out, "  sta stack_lo + 1,x\n");
@@ -635,8 +633,7 @@ int M6502::xor_integer()
 
 int M6502::xor_integer(int const_val)
 {
-  fprintf(out, "; xor_integer (const_val)");
-  fprintf(out, "  inx\n");
+  fprintf(out, "; xor_integer (const_val)\n");
   fprintf(out, "  lda #%d\n", const_val & 0xff);
   fprintf(out, "  eor stack_lo + 1,x\n");
   fprintf(out, "  sta stack_lo + 1,x\n");
@@ -1949,6 +1946,14 @@ int M6502::math_abs_I()
   return 0;
 }
 
+int M6502::cpu_nop()
+{
+  fprintf(out, "; cpu_nop()\n");
+  fprintf(out, "  nop\n");
+
+  return 0;
+}
+
 void M6502::insert_math_max()
 {
   fprintf(out, 
@@ -2006,4 +2011,5 @@ void M6502::insert_math_abs()
     "  sta stack_hi + 1,x\n"
     "  rts\n");
 };
+
 

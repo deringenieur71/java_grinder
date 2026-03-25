@@ -56,8 +56,6 @@ public class VIC
   public static int readControl1() { return 0; }
 
   // 0xd012
-  public static void waitRaster(int value) { }
-
   // 0xd013
   // 0xd014
 

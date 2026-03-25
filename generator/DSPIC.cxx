@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.mikekohn.net/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2021 by Michael Kohn
+ * Copyright 2014-2023 by Michael Kohn
  *
  */
 
@@ -266,7 +266,7 @@ int DSPIC::push_double(double f)
 }
 #endif
 
-int DSPIC::push_ref(std::string &name)
+int DSPIC::push_ref(std::string &name, int index)
 {
   if (reg < reg_max)
   {
@@ -1759,6 +1759,12 @@ void DSPIC::pop_reg(char *dst)
     else
   {
     reg--;
+    if (reg < 0)
+    {
+      printf("Internal Error %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+
     sprintf(dst, "w%d", REG_STACK(reg));
   }
 }

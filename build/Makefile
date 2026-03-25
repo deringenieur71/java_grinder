@@ -20,6 +20,7 @@ API= \
   api/draw3d_object.o \
   api/draw3d_texture.o \
   api/grinder.o \
+  api/ice_fun.o \
   api/intellivision.o \
   api/i2c.o \
   api/invoke.o \
@@ -58,6 +59,7 @@ CPUS= \
   generator/DotNet.o \
   generator/DSPIC.o \
   generator/Epiphany.o \
+  generator/F100_L.o \
   generator/Intellivision.o \
   generator/M6502.o \
   generator/M6502_8.o \
@@ -69,6 +71,7 @@ CPUS= \
   generator/MSP430.o \
   generator/MSP430X.o \
   generator/Propeller.o \
+  generator/RISCV.o \
   generator/R4000.o \
   generator/R5900.o \
   generator/SH4.o \
@@ -98,6 +101,7 @@ SYSTEMS= \
   generator/SegaGenesis.o \
   generator/SNES.o \
   generator/SleepyBee.o \
+  generator/RISCVIceFun.o \
   generator/TI84.o \
   generator/TI99.o \
   generator/TRS80Coco.o \

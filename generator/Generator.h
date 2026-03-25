@@ -2,10 +2,10 @@
  *  Java Grinder
  *  Author: Michael Kohn
  *   Email: mike@mikekohn.net
- *     Web: http://www.mikekohn.net/
+ *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2022 by Michael Kohn
+ * Copyright 2014-2023 by Michael Kohn
  *
  */
 
@@ -26,6 +26,7 @@
 #include "generator/API_DSP.h"
 #include "generator/API_Draw3D.h"
 #include "generator/API_Grinder.h"
+#include "generator/API_IceFun.h"
 #include "generator/API_Intellivision.h"
 #include "generator/API_Joystick.h"
 #include "generator/API_Keyboard.h"
@@ -54,6 +55,7 @@ class Generator :
   public API_DSP,
   public API_Draw3D,
   public API_Grinder,
+  public API_IceFun,
   public API_Intellivision,
   public API_Joystick,
   public API_Keyboard,
@@ -105,7 +107,7 @@ public:
   virtual int push_long(int64_t n);
   virtual int push_float(float f);
   virtual int push_double(double f);
-  virtual int push_ref(std::string &name) = 0;
+  virtual int push_ref(std::string &name, int index) = 0;
   virtual int pop_local_var_int(int index) = 0;
   virtual int pop_local_var_ref(int index) = 0;
   virtual int pop_local_var_float(int index) { return -1; }
@@ -241,6 +243,8 @@ protected:
   int preload_array_align;
   std::map<uint32_t, int> constants_pool;
   std::map<std::string, ArrayFiles> preload_arrays;
+
+  const char *show_cond(int value);
 };
 
 enum

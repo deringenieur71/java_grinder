@@ -54,7 +54,6 @@ public:
   virtual int c64_vic_sprite7pos();
   virtual int c64_vic_writeControl1();
   virtual int c64_vic_readControl1();
-  virtual int c64_vic_waitRaster();
   virtual int c64_vic_spriteEnable();
   virtual int c64_vic_writeControl2();
   virtual int c64_vic_readControl2();
