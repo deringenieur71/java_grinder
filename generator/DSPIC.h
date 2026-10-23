@@ -5,7 +5,7 @@
  *     Web: https://www.mikekohn.net/
  * License: GPLv3
  *
- * Copyright 2014-2023 by Michael Kohn
+ * Copyright 2014-2026 by Michael Kohn
  *
  */
 
@@ -13,12 +13,6 @@
 #define JAVA_GRINDER_GENERATOR_DSPIC_H
 
 #include "generator/Generator.h"
-
-enum
-{
-  DSPIC30F3012,
-  DSPIC33FJ06GS101A,
-};
 
 class DSPIC : public Generator
 {
@@ -102,7 +96,7 @@ public:
   virtual int array_write_int(std::string &name, int field_id);
   //virtual void close();
 
-  // GPIO functions
+  // GPIO methods.
   virtual int ioport_setPinsAsInput_I(int port);
   virtual int ioport_setPinsAsInput_I(int port, int const_val);
   virtual int ioport_setPinsAsOutput_I(int port);
@@ -116,6 +110,8 @@ public:
   virtual int ioport_setPinAsOutput_I(int port, int const_val);
   virtual int ioport_setPinAsInput_I(int port);
   virtual int ioport_setPinAsInput_I(int port, int const_val);
+  virtual int ioport_setPinAsHighZ_I(int port);
+  virtual int ioport_setPinAsHighZ_I(int port, int const_val);
   virtual int ioport_setPinHigh_I(int port);
   virtual int ioport_setPinHigh_I(int port, int const_val);
   virtual int ioport_setPinLow_I(int port);
@@ -124,7 +120,15 @@ public:
   virtual int ioport_getPortInputValue(int port);
   //virtual int ioport_setPortOutputValue_I(int port);
 
-  // SPI functions
+  // UART methods.
+  virtual int uart_init_I(int port);
+  virtual int uart_init_I(int port, int baud_rate);
+  virtual int uart_send_I(int port);
+  virtual int uart_read(int port);
+  virtual int uart_isDataAvailable(int port);
+  virtual int uart_isSendReady(int port);
+
+  // SPI methods..
   virtual int spi_init_II(int port);
   virtual int spi_init_II(int port, int clock_divisor, int mode);
   virtual int spi_init16_II(int port);
@@ -138,9 +142,29 @@ public:
   virtual int spi_disable(int port);
   virtual int spi_enable(int port);
 
-  // CPU functions
+  // ADC functions.
+  virtual int adc_enable();
+  virtual int adc_disable();
+  virtual int adc_setChannel_I();
+  virtual int adc_setChannel_I(int channel);
+  virtual int adc_read();
+  virtual int adc_read_I();
+  virtual int adc_read_I(int channel);
+
+  // Timer functions.
+  virtual int timer_setInterval_II();
+  virtual int timer_setInterval_II(int cycles, int divider);
+  virtual int timer_setListener_Z();
+  virtual int timer_setListener_Z(int const_value);
+  virtual int timer_getValue();
+  virtual int timer_setValue_I();
+  virtual int timer_setValue_I(int const_value);
+
+  // CPU methods.
   virtual int cpu_setClock16();
   virtual int cpu_nop();
+  virtual int cpu_interruptEnable();
+  virtual int cpu_interruptDisable();
 
   // Memory
   virtual int memory_read8_I();
@@ -186,6 +210,13 @@ public:
   virtual int dsp_shiftA();
   virtual int dsp_shiftB();
 
+  enum
+  {
+    P30F3012,
+    P33FJ06GS101A,
+    P33CK64MC105,
+  };
+
 protected:
   virtual int get_int_size() { return 2; }
 
@@ -208,8 +239,10 @@ private:
   int stack;          // count how many things we put on the stack
   uint8_t chip_type;
   bool is_main;
+  bool is_interrupt;
   bool need_stack_set;
   bool need_tables;
+  bool need_timer_interrupt;
   //int flash_start;
 };
 

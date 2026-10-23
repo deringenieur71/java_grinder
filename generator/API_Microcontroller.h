@@ -30,6 +30,8 @@ public:
   virtual int ioport_setPinAsOutput_I(int port, int const_val) { return -1; }
   virtual int ioport_setPinAsInput_I(int port) { return -1; }
   virtual int ioport_setPinAsInput_I(int port, int const_val) { return -1; }
+  virtual int ioport_setPinAsHighZ_I(int port) { return -1; }
+  virtual int ioport_setPinAsHighZ_I(int port, int const_val) { return -1; }
   virtual int ioport_setPinHigh_I(int port) { return -1; }
   virtual int ioport_setPinHigh_I(int port, int const_val) { return -1; }
   virtual int ioport_setPinLow_I(int port) { return -1; }
@@ -69,6 +71,8 @@ public:
   virtual int adc_setChannel_I() { return -1; }
   virtual int adc_setChannel_I(int channel) { return -1; }
   virtual int adc_read() { return -1; }
+  virtual int adc_read_I() { return -1; }
+  virtual int adc_read_I(int channel) { return -1; }
 
   // Timer functions.
   virtual int timer_setInterval_II() { return -1; }
