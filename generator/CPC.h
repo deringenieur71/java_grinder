@@ -35,6 +35,11 @@ public:
   virtual int cpc_plot_III();
   virtual int cpc_draw_III();
   virtual char cpc_readChar();
+  virtual int cpc_screenAddress_III ();
+  virtual int cpc_nextScreenLine_I ();
+  virtual int cpc_blitOpaque_IIII ();
+  virtual int cpc_blitMasked_IIII ();
+
   virtual int cpc_getVMEM_ICC();
   virtual int cpc_putSpriteMode0_IIII();
   virtual int cpc_printI_I();
