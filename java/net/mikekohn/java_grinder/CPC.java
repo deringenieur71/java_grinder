@@ -29,6 +29,20 @@ abstract public class CPC
   public static void setCursor(int column,int line) { }
   public static void plot(int x, int y, int foreground) { }
   public static void draw(int x, int y, int foreground) { }
+// Low-level CPC screen API. x is a byte coordinate, y a raster line.
+  public static int screenAddress(int screenBase, int x, int y) { return 0; }
+  public static int nextScreenLine(int address) { return 0; }
+
+  // Source data is stored at a native CPC address.
+  // Width is measured in bytes, height in raster lines.
+  public static void blitOpaque(int screenAddress, int spriteAddress,
+    int width, int height) { }
+  // Source contains mask,sprite pairs for each output byte.
+  // Result is oldScreen AND mask OR sprite.
+  public static void blitMasked(int screenAddress, int spriteAddress,
+    int width, int height) { }
+  // Legacy names retained for source compatibility.
+  
   public static int getVMEM(int start, char x, char y) { return 0; }
   public static void putSpriteMode0(int pAddress, int nWidth, int nHeight, int Sprite) { }
   public static void printI(int start) { }
