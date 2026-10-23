@@ -32,6 +32,11 @@ public:
   virtual int cpc_plot_III() { return -1; }
   virtual int cpc_draw_III() { return -1; }
   virtual char cpc_readChar() { return -1; }
+  virtual int cpc_screenAddress_III () { return -1; }
+  virtual int cpc_nextScreenLine_I () { return -1; }
+  virtual int cpc_blitOpaque_IIII () { return -1; }
+  virtual int cpc_blitMasked_IIII () { return -1; }
+
   virtual int cpc_getVMEM_ICC() {return -1; }
   virtual int cpc_putSpriteMode0_IIII() { return -1; }
   virtual int cpc_printI_I() { return -1; }
