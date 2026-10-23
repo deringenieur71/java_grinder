@@ -444,9 +444,14 @@ int CPC::cpc_getVMEM_ICC()
   fprintf(out, "  ld    h, a\n");
   fprintf(out, "  add  hl, de\n");
   fprintf(out, "  push hl\n");
-  
+ 
   return 0;
  
+}
+
+int CPC::cpc_screenAddress_III ()
+{
+  return cpc_getVMEM_ICC ();
 }
 
 int CPC::cpc_putSpriteMode0_IIII()
@@ -635,4 +640,77 @@ int CPC::cpc_putChar_C(char c)
 
   return 0;
 }
+
+int CPC::cpc_nextScreenLine_I ()
+{
+  const int id = label_count++;
+
+  fprintf (out, " ; nextScreenLine_I\n");
+  fprintf (out, " pop hl\n");
+  fprintf (out, " ld a,h\n");
+  fprintf (out, " add a,0x08\n");
+  fprintf (out, " ld h,a\n");
+  fprintf (out, " sub 0xc0\n");
+  fprintf (out, " jr c,_nsl_done_%d\n", id);
+  fprintf (out, " ld bc,0xc050\n");
+  fprintf (out, " add hl,bc\n");
+  fprintf (out, "_nsl_done_%d:\n", id);
+  fprintf (out, " push hl\n");
+
+  return 0;
+}
+
+int CPC::cpc_blitOpaque_IIII ()
+{
+  return cpc_putSpriteMode0_IIII ();
+}
+
+// Masked source format is mask,sprite for every output byte.
+// Output is oldScreen AND mask OR sprite.
+int CPC::cpc_blitMasked_IIII ()
+{
+  const int id = label_count++;
+
+  fprintf (out, " ; blitMasked_IIII\n");
+  fprintf (out, " pop de\n");
+  fprintf (out, " pop hl\n");
+  fprintf (out, " ld c,l\n");
+  fprintf (out, " pop hl\n");
+  fprintf (out, " ld b,l\n");
+  fprintf (out, " pop hl\n");
+  fprintf (out, "_bmask_outer_%d:\n", id);
+  fprintf (out, " push bc\n");
+  fprintf (out, " ld b,c\n");
+  fprintf (out, " push hl\n");
+  fprintf (out, "_bmask_inner_%d:\n", id);
+  fprintf (out, " ld a,(de)\n");
+  fprintf (out, " ld c,a\n");
+  fprintf (out, " ld a,(hl)\n");
+  fprintf (out, " and c\n");
+  fprintf (out, " ld c,a\n");
+  fprintf (out, " inc de\n");
+  fprintf (out, " ld a,(de)\n");
+  fprintf (out, " or c\n");
+  fprintf (out, " ld (hl),a\n");
+  fprintf (out, " inc de\n");
+  fprintf (out, " inc hl\n");
+  fprintf (out, " djnz _bmask_inner_%d\n", id);
+  fprintf (out, " pop hl\n");
+  fprintf (out, " ld a,h\n");
+  fprintf (out, " add a,0x08\n");
+  fprintf (out, " ld h,a\n");
+  fprintf (out, " sub 0xc0\n");
+  fprintf (out, " jr c,_bmask_next_%d\n", id);
+  fprintf (out, " ld bc,0xc050\n");
+  fprintf (out, " add hl,bc\n");
+  fprintf (out, "_bmask_next_%d:\n", id);
+  fprintf (out, " pop bc\n");
+  fprintf (out, " djnz _bmask_outer_%d\n", id);
+
+  return 0;
+}
+
+
+
+
 
